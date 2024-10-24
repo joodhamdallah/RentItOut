@@ -4,3 +4,15 @@ node_modules/
 # Environment variables
 .env
 
+
+
+# Temporary files
+.DS_Store
+Thumbs.db
+
+# IDE files (if using VSCode)
+.vscode/
+.idea/
+
+# OS-specific files
+*.swp
