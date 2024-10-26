@@ -1,0 +1,16 @@
+const express = require('express');
+const app = express();
+require('dotenv').config({ path: './.env' });
+const authRoutes = require('./routes/authRoutes'); // Correct path from rootconst userRoutes = require('./userRoutes');
+//const userRoutes = require('./routes/userRoutes'); // Correct path from root
+
+
+app.use(express.json());
+app.use('/api/auth', authRoutes);  // Routes for login and signup
+//app.use('/api/users', userRoutes); // Routes for user management (requires auth)
+
+
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
