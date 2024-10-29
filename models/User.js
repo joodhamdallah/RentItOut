@@ -1,5 +1,5 @@
 // models/userModel.js
-const connection = require('../config/database'); // Import your database connection
+const connection = require('../config/database'); 
 const bcrypt = require('bcrypt');
 
 class UserModel {

@@ -1,4 +1,4 @@
-const connection = require('../config/database'); // Adjust this path based on your folder structure
+const connection = require('../config/database'); 
 
 class CategoryModel {
     static getAllCategories() {
