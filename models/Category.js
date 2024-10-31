@@ -93,6 +93,20 @@ class CategoryModel {
             });
         });
     }
+
+    static incrementNumberOfItems(categoryId) {
+    return new Promise((resolve, reject) => {
+      const query = 'UPDATE Categories SET number_of_items = number_of_items + 1 WHERE category_id = ?';
+      connection.query(query, [categoryId], (err, results) => {
+        if (err) {
+          return reject(err);
+        }
+        resolve(results.affectedRows > 0); // Returns true if the update was successful
+      });
+    });
+  }
+  
+    
 }
 
 
