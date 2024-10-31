@@ -1,4 +1,5 @@
 const Item = require('../models/Item');
+const CategoryModel = require('../models/Category'); 
 
 // List all items
 exports.listItems = (req, res) => {
@@ -21,15 +22,27 @@ exports.getItem = (req, res) => {
   });
 };
 
+
 // Create a new item
-exports.createItem = (req, res) => {
+exports.createItem = async (req, res) => {
   const itemData = req.body;
-  Item.createItem(itemData, (err, result) => {
-    if (err) {
-      return res.status(500).json({ error: 'Failed to create item' });
+  const { category_id } = itemData; // Extract cat_id from the request body
+
+  try {
+    // Step 1: Create the new item
+    const result = await Item.createItem(itemData);
+
+    // Step 2: Increment the number of items for the given cat_id
+    const success = await CategoryModel.incrementNumberOfItems(category_id); 
+
+    if (!success) {
+      return res.status(404).json({ error: 'Category not found or number of items could not be updated' });
     }
-    res.status(201).json({ message: 'Item created successfully', itemId: result.insertId });
-  });
+    res.status(201).json({ message: 'Item created successfully', item_id: result.insertId });
+  } catch (err) {
+    console.error("Error creating item:", err);
+    res.status(500).json({ error: 'Failed to create item' });
+  }
 };
 
 // Update item details

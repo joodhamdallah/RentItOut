@@ -1,4 +1,4 @@
-const CategoryModel = require('../models/Category'); // Adjust this path based on your folder structure
+const CategoryModel = require('../models/Category'); 
 
 class CategoryController {
     static async listAllCategories(req, res) {
@@ -58,7 +58,7 @@ class CategoryController {
             res.status(500).json({ success: false, message: 'Failed to update category', error });
         }
     }
-    
+
     static async addCategory(req, res) {
         const { category_name, category_description, number_of_items } = req.body;
 
@@ -91,6 +91,7 @@ class CategoryController {
             res.status(500).json({ success: false, message: 'Failed to delete category', error });
         }
     }
+    
 }
 
 module.exports = CategoryController;
