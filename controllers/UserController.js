@@ -1,7 +1,7 @@
 const UserModel = require('../models/User');
 
 class UserController {
-    // Retrieve all users (admin only)
+    // Retrieve all users
     static async getAllUsers(req, res) {
         try {
             const users = await UserModel.findAllUsers();
@@ -11,7 +11,7 @@ class UserController {
         }
     }
 
-    // Retrieve user by ID (admin only)
+    // Retrieve user by ID
     static async getUserById(req, res) {
         try {
             const { id } = req.params;
@@ -25,7 +25,7 @@ class UserController {
         }
     }
 
-    // Retrieve user by email (admin only)
+    // Retrieve user by email
     static async getUserByEmail(req, res) {
         try {
             const { email } = req.params;
@@ -39,7 +39,7 @@ class UserController {
         }
     }
 
-    // Retrieve user by phone number (admin only)
+    // Retrieve user by phone number
     static async getUserByPhoneNumber(req, res) {
         try {
             const { phoneNumber } = req.params;
@@ -53,10 +53,15 @@ class UserController {
         }
     }
 
-    // Create a new user (admin only)
+    // Create a new user 
     static async createUser(req, res) {
         try {
             const newUser = req.body;
+            // Check if the email already exists
+            const existingUser = await UserModel.findUserByEmail(newUser.email);
+            if (existingUser) {
+            return res.status(400).json({ message: 'This email is already registered, please use another email.' });
+        }
             const userId = await UserModel.createUser(newUser);
             res.status(201).json({ message: 'User created successfully', userId });
         } catch (error) {
@@ -64,7 +69,7 @@ class UserController {
         }
     }
 
-    // Delete a user by ID (admin only)
+    // Delete a user by ID 
     static async deleteUser(req, res) {
         try {
             const { id } = req.params;
@@ -82,7 +87,7 @@ class UserController {
     // Retrieve the current authenticated user’s information
     static async getCurrentUser(req, res) {
         try {
-            const userId = req.userId;  // This is set by the verifyToken middleware
+            const userId = req.userId;  // set by the verifyToken middleware
             const user = await UserModel.findUserById(userId);
             if (!user) {
                 return res.status(404).json({ message: 'User not found' });
@@ -96,7 +101,7 @@ class UserController {
     // Update the current authenticated user's profile
     static async updateUser(req, res) {
         try {
-            const userId = req.userId;  // This is set by the verifyToken middleware
+            const userId = req.userId;  // set by the verifyToken middleware
             const { phone_number, address, first_name, last_name } = req.body;
 
             // Create an object with only the provided fields to update

@@ -20,7 +20,6 @@ const insertRoles = () => {
     );
   });
 };
-
 // Function to insert fake data into Users table with dynamic role_id
 const insertUsers = async () => {
   // Retrieve role IDs for admin, customer, and vendor roles

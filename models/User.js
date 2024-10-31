@@ -3,6 +3,16 @@ const connection = require('../config/database');
 const bcrypt = require('bcrypt');
 
 class UserModel {
+    static async getRoleIds() {
+    return new Promise((resolve, reject) => {
+        const query = 'SELECT role_id FROM Roles'; // role IDs are stored in a table called 'Roles'
+        connection.query(query, (err, results) => {
+            if (err) return reject(err);
+            const roleIds = results.map(row => row.role_id); // Extract role_id from each row
+            resolve(roleIds); // Return an array of role IDs
+        });
+    });
+   }
     static async findUserByEmail(email) {
         return new Promise((resolve, reject) => {
             const query = 'SELECT * FROM Users WHERE email = ?';

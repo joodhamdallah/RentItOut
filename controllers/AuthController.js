@@ -9,6 +9,13 @@ class AuthController {
     static async register(req, res) {
         try {
             const { email, password, role_id, user_name, first_name, last_name, phone_number, address } = req.body;
+            const allowedRoleIds = await UserModel.getRoleIds();
+            // Check if the role_id is valid
+            if (!allowedRoleIds.includes(role_id)) {
+                return res.status(403).json({ message: 'Invalid role ID' });
+            }
+
+            if (role_id === 1) return res.status(403).json({ message: 'Admin registration is not allowed' });
 
             // Check if the email already exists
             const existingUser = await UserModel.findUserByEmail(email);
@@ -19,6 +26,7 @@ class AuthController {
             // Validate email and password
             if (!validateEmail(email)) return res.status(400).json({ message: 'Please provide a valid email address.' });
             if (!validatePassword(password)) return res.status(400).json({ message: 'Password must meet security requirements.' });
+
 
             const userId = await UserModel.createUser({ email, password, role_id, user_name, first_name, last_name, phone_number, address });
             res.status(201).json({ message: 'User created successfully', userId });
@@ -84,7 +92,7 @@ class AuthController {
             // Construct reset URL
             const resetURL = `${req.protocol}://${req.get('host')}/api/auth/resetPassword/${resetToken}`;
             const message = `Forgot your password? Reset it using this link: ${resetURL}\nIf you didn't request a password reset, please ignore this email.`;
-            console.log("Constructed reset URL:", resetURL);
+           
 
             // send the email
             await sendEmail({
@@ -92,11 +100,11 @@ class AuthController {
                 subject: 'Your password reset token (valid for 10 minutes)',
                 message
             });
-            console.log("Email sent successfully to:", user.email);
+          
             res.status(200).json({ message: 'Token sent to email!' });
 
         } catch (err) {
-            console.error("Error during forgotPassword:", err);
+            
 
             // Clear the reset token if sending email fails
             if (user) {
@@ -129,9 +137,7 @@ class AuthController {
     static async changePassword(req, res) {
         const { currentPassword, newPassword } = req.body;
         const user = await UserModel.findUserById(req.userId);
-        
-        console.log("userid=" + req.userId);
-        console.log("user=" + user);
+    
         if (!(await UserModel.comparePasswords(currentPassword, user.password))) {
             return res.status(401).json({ message: 'Current password is incorrect.' });
         }

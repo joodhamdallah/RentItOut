@@ -17,7 +17,7 @@ const verifyToken = async (req, res, next) => {
     }
     try {
         const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-
+        
         // Check if the user exists in the database
         const currentUser = await UserModel.findUserById(decoded.id);
         if (!currentUser) {
@@ -28,7 +28,7 @@ const verifyToken = async (req, res, next) => {
         req.userId = currentUser.user_id;
         req.userRole = currentUser.role_id;
         req.user = currentUser;
-
+        console.log('Decoded user role from token:', req.userRole);
     
         next(); // Pass to the next middleware
 
@@ -50,11 +50,16 @@ const verifyToken = async (req, res, next) => {
 // accept role names or IDs
 const authorizeRole = (...allowedRoles) => (req, res, next) => {
     const allowedRoleIds = allowedRoles.map(role => typeof role === 'string' ? roleMapping[role] : role);
-
+    console.log('Allowed roles:', allowedRoleIds);
+    console.log('User role:', req.userRole);
+    
     if (!allowedRoleIds.includes(req.userRole)) {
         return res.status(403).json({ message: 'You do not have permission to perform this action' });
     }
-    next();
+    else{
+        next();
+    }
+    
 };
 
 module.exports = {

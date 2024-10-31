@@ -5,8 +5,7 @@ const AuthController=require('../controllers/AuthController');
 const {verifyToken,authorizeRole}=require('../middleware/authMiddleware')
 
 // Authentication routes
-
-router.post('/register', authorizeRole('vendor','customer') ,AuthController.register);
+router.post('/register', AuthController.register);
 router.post('/login', AuthController.login);
 router.post('/logout', AuthController.logout);
 router.post('/forgotPassword', AuthController.forgotPassword);
