@@ -20,9 +20,9 @@ static createItem(itemData) {
       [item_name, item_description, rent_price, availability, image_url, category_id, deposit, item_count], 
       (err, result) => {
         if (err) {
-          return reject(err); // Reject the promise with the error
+          return reject(err); 
         }
-        resolve(result); // Resolve the promise with the result
+        resolve(result);
       }
     );
   });
@@ -43,36 +43,36 @@ static createItem(itemData) {
 static deleteItem(itemId) {
   return new Promise(async (resolve, reject) => {
     try {
-      // Step 1: Get the category ID before deleting the item
+      // Get category ID before deleting the item
       const item = await new Promise((res, rej) => {
         db.query('SELECT category_id FROM Items WHERE item_id = ?', [itemId], (err, results) => {
           if (err) return rej(err);
-          res(results[0]); // Resolve with the first result
+          res(results[0]); 
         });
       });
 
       if (!item) {
-        return resolve(false); // No item found to delete
+        return resolve(false); //No item found to delete
       }
 
       const categoryId = item.category_id;
 
-      // Step 2: Delete the item
+      //Delete the item
       db.query('DELETE FROM Items WHERE item_id = ?', [itemId], (err, results) => {
         if (err) {
-          return reject(err); // Reject if there's an error
+          return reject(err); //check for an error
         }
 
-        // Step 3: Decrement the number of items in the category
+        //Decrement the number of items in the category
         db.query('UPDATE Categories SET number_of_items = number_of_items - 1 WHERE category_id = ?', [categoryId], (err) => {
           if (err) {
-            return reject(err); // Reject if there's an error
+            return reject(err); 
           }
-          resolve(results.affectedRows > 0); // Resolve true if an item was deleted, false otherwise
+          resolve(results.affectedRows > 0); //Resolve true if an item was deleted, false otherwise
         });
       });
     } catch (error) {
-      reject(error); // Handle any errors
+      reject(error); 
     }
   });
 }

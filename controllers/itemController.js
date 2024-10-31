@@ -26,13 +26,13 @@ exports.getItem = (req, res) => {
 // Create a new item
 exports.createItem = async (req, res) => {
   const itemData = req.body;
-  const { category_id } = itemData; // Extract cat_id from the request body
+  const { category_id } = itemData; // take cat_id from the request body
 
   try {
-    // Step 1: Create the new item
+    //Create the new item
     const result = await Item.createItem(itemData);
 
-    // Step 2: Increment the number of items for the given cat_id
+    //Increment the number of items for the given cat_id
     const success = await CategoryModel.incrementNumberOfItems(category_id); 
 
     if (!success) {
