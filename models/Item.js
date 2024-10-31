@@ -30,9 +30,17 @@ const updateItem = (id, itemData, callback) => {
   );
 };
 
-// Delete an item
-const deleteItem = (id, callback) => {
-  db.query('DELETE FROM Items WHERE item_id = ?', [id], callback);
+const deleteItem = (id) => {
+  return new Promise((resolve, reject) => {
+    const query = 'DELETE FROM Items WHERE item_id = ?';
+    db.query(query, [id], (err, results) => {
+      if (err) {
+        return reject(err); // Rejects the Promise if an error occurs
+      }
+      resolve(results.affectedRows > 0); // Resolves with `true` if an item was deleted, `false` if not
+    });
+  });
 };
+
 
 module.exports = { getAllItems, getItemById, createItem, updateItem, deleteItem };
