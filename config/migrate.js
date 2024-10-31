@@ -1,4 +1,4 @@
-const connection = require('./database');  //Import the db connection
+const connection = require('./database');  // Import the db connection
 
 const createTables = [
     `CREATE TABLE IF NOT EXISTS Roles (
@@ -19,7 +19,7 @@ const createTables = [
         address TEXT,
         password_reset_token VARCHAR(255),  
         password_reset_expires DATETIME,
-        FOREIGN KEY (role_id) REFERENCES Roles(role_id)
+        FOREIGN KEY (role_id) REFERENCES Roles(role_id) ON DELETE CASCADE
     );`,
 
     `CREATE TABLE IF NOT EXISTS Categories (
@@ -38,7 +38,7 @@ const createTables = [
         image_url TEXT,
         category_id INT,
         deposit DECIMAL(10, 2),
-        FOREIGN KEY (category_id) REFERENCES Categories(category_id)
+        FOREIGN KEY (category_id) REFERENCES Categories(category_id) ON DELETE CASCADE
     );`,
 
     `CREATE TABLE IF NOT EXISTS Rentals (
@@ -47,7 +47,7 @@ const createTables = [
         return_date DATE,
         user_id INT,
         logistic_type VARCHAR(255),
-        FOREIGN KEY (user_id) REFERENCES Users(user_id)
+        FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
     );`,
 
     `CREATE TABLE IF NOT EXISTS Rental_details (
@@ -56,8 +56,8 @@ const createTables = [
         item_id INT,
         quantity INT,
         subtotal DECIMAL(10, 2),
-        FOREIGN KEY (rental_id) REFERENCES Rentals(rental_id),
-        FOREIGN KEY (item_id) REFERENCES Items(item_id)
+        FOREIGN KEY (rental_id) REFERENCES Rentals(rental_id) ON DELETE CASCADE,
+        FOREIGN KEY (item_id) REFERENCES Items(item_id) ON DELETE CASCADE
     );`,
 
     `CREATE TABLE IF NOT EXISTS Payments (
@@ -70,8 +70,8 @@ const createTables = [
         total_price DECIMAL(10, 2),
         rental_id INT,
         pay_id INT,
-        FOREIGN KEY (rental_id) REFERENCES Rentals(rental_id),
-        FOREIGN KEY (pay_id) REFERENCES Payments(pay_id)
+        FOREIGN KEY (rental_id) REFERENCES Rentals(rental_id) ON DELETE CASCADE,
+        FOREIGN KEY (pay_id) REFERENCES Payments(pay_id) ON DELETE CASCADE
     );`,
 
     `CREATE TABLE IF NOT EXISTS Feedbacks (
@@ -80,17 +80,17 @@ const createTables = [
         user_id INT,
         comment TEXT,
         rating INT,
-        FOREIGN KEY (rental_id) REFERENCES Rentals(rental_id),
-        FOREIGN KEY (user_id) REFERENCES Users(user_id)
+        FOREIGN KEY (rental_id) REFERENCES Rentals(rental_id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
     );`,
 
     `CREATE TABLE IF NOT EXISTS Returning_Items (
         RItem_id INT PRIMARY KEY AUTO_INCREMENT,
         item_name VARCHAR(255),
         status_for_item VARCHAR(255),
-        returned_amount DECIMAL(10, 2),
+        replacement_price DECIMAL(10, 2),
         category_id INT,
-        FOREIGN KEY (category_id) REFERENCES Categories(category_id)
+        FOREIGN KEY (category_id) REFERENCES Categories(category_id) ON DELETE CASCADE
     );`
 ];
 
