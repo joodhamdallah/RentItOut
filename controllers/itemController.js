@@ -45,12 +45,18 @@ exports.updateItem = (req, res) => {
 };
 
 // Delete an item
-exports.deleteItem = (req, res) => {
+exports.deleteItem = async (req, res) => {
   const id = req.params.id;
-  Item.deleteItem(id, (err, result) => {
-    if (err) {
-      return res.status(500).json({ error: 'Failed to delete item' });
-    }
-    res.status(200).json({ message: 'Item deleted successfully' });
-  });
+
+  try {
+      const success = await Item.deleteItem(id);
+      if (!success) {
+          return res.status(404).json({ success: false, message: 'Item not found' });
+      }
+      res.status(200).json({ success: true, message: 'Item deleted successfully' });
+  } catch (err) {
+      console.error("Error deleting item:", err);
+      res.status(500).json({ success: false, message: 'Failed to delete item', error: err });
+  }
 };
+

@@ -90,11 +90,12 @@ const insertItems = () => {
         faker.datatype.boolean(),
         faker.image.url(),
         randomCategoryId,
-        faker.commerce.price(50, 200, 2)
+        faker.commerce.price(50, 200, 2), // deposit
+        faker.number.int({ min: 1, max: 20 }) // item_count 
       ];
 
       connection.query(
-        'INSERT INTO Items (item_name, item_description, rent_price, availability, image_url, category_id, deposit) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO Items (item_name, item_description, rent_price, availability, image_url, category_id, deposit, item_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
         fakeItem,
         (err) => {
           if (err) throw err;

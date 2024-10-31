@@ -70,17 +70,18 @@ class CategoryModel {
     }
     
     
-    static createCategory({ category_name, category_description }) {
+    static createCategory({ category_name, category_description, number_of_items }) {
         return new Promise((resolve, reject) => {
-            const query = 'INSERT INTO Categories (category_name, category_description) VALUES (?, ?)';
-            connection.query(query, [category_name, category_description], (err, results) => {
+            const query = 'INSERT INTO Categories (category_name, category_description, number_of_items) VALUES (?, ?, ?)';
+            connection.query(query, [category_name, category_description, number_of_items], (err, results) => {
                 if (err) {
                     return reject(new Error('Failed to create category: ' + err.message));
                 }
-                resolve({ success: true, id: results.insertId, category_name, category_description });
+                resolve({ success: true, id: results.insertId, category_name, category_description, number_of_items });
             });
         });
     }
+    
     static deleteCategory(categoryId) {
         return new Promise((resolve, reject) => {
             const query = 'DELETE FROM Categories WHERE category_id = ?';
