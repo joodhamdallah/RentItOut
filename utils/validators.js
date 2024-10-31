@@ -4,7 +4,7 @@ function validatePassword(password) {
     const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
     return passwordPattern.test(password);
 }
-// utils/validators.js
+
 function validateEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Simple regex for email validation
     return emailRegex.test(email);
@@ -12,6 +12,6 @@ function validateEmail(email) {
 
 module.exports = {
     validatePassword,
-    validateEmail, // Export the new function
+    validateEmail, 
 };
 

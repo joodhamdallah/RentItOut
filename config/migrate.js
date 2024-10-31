@@ -17,6 +17,8 @@ const createTables = [
         first_name VARCHAR(100),
         last_name VARCHAR(100),
         address TEXT,
+        password_reset_token VARCHAR(255),  
+        password_reset_expires DATETIME,
         FOREIGN KEY (role_id) REFERENCES Roles(role_id)
     );`,
 
@@ -86,7 +88,7 @@ const createTables = [
         RItem_id INT PRIMARY KEY AUTO_INCREMENT,
         item_name VARCHAR(255),
         status_for_item VARCHAR(255),
-        replacement_price DECIMAL(10, 2),
+        returned_amount DECIMAL(10, 2),
         category_id INT,
         FOREIGN KEY (category_id) REFERENCES Categories(category_id)
     );`
