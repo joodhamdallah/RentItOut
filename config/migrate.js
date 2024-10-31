@@ -28,16 +28,17 @@ const createTables = [
     );`,
 
     `CREATE TABLE IF NOT EXISTS Items (
-        item_id INT PRIMARY KEY AUTO_INCREMENT,
-        item_name VARCHAR(255),
-        item_description TEXT,
-        rent_price DECIMAL(10, 2),
-        availability BOOLEAN,
-        image_url TEXT,
-        category_id INT,
-        deposit DECIMAL(10, 2),
-        FOREIGN KEY (category_id) REFERENCES Categories(category_id)
-    );`,
+    item_id INT PRIMARY KEY AUTO_INCREMENT,
+    item_name VARCHAR(255),
+    item_description TEXT,
+    rent_price DECIMAL(10, 2),
+    availability BOOLEAN,
+    image_url TEXT,
+    category_id INT,
+    deposit DECIMAL(10, 2),
+    item_count INT DEFAULT 0,  -- New column for counting items
+    FOREIGN KEY (category_id) REFERENCES Categories(category_id)
+ );`,
 
     `CREATE TABLE IF NOT EXISTS Rentals (
         rental_id INT PRIMARY KEY AUTO_INCREMENT,

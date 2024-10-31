@@ -12,20 +12,20 @@ const getItemById = (id, callback) => {
 
 // Create a new item
 const createItem = (itemData, callback) => {
-  const { item_name, item_description, rent_price, availability, image_url, category_id, deposit } = itemData;
+  const { item_name, item_description, rent_price, availability, image_url, category_id, deposit, item_count } = itemData; // Added item_count
   db.query(
-    'INSERT INTO Items (item_name, item_description, rent_price, availability, image_url, category_id, deposit) VALUES (?, ?, ?, ?, ?, ?, ?)',
-    [item_name, item_description, rent_price, availability, image_url, category_id, deposit],
+    'INSERT INTO Items (item_name, item_description, rent_price, availability, image_url, category_id, deposit, item_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', // Included item_count in the query
+    [item_name, item_description, rent_price, availability, image_url, category_id, deposit, item_count], // Added item_count to the parameters
     callback
   );
 };
 
 // Update item details
 const updateItem = (id, itemData, callback) => {
-  const { item_name, item_description, rent_price, availability, image_url, category_id, deposit } = itemData;
+  const { item_name, item_description, rent_price, availability, image_url, category_id, deposit, item_count } = itemData; // Added item_count
   db.query(
-    'UPDATE Items SET item_name = ?, item_description = ?, rent_price = ?, availability = ?, image_url = ?, category_id = ?, deposit = ? WHERE item_id = ?',
-    [item_name, item_description, rent_price, availability, image_url, category_id, deposit, id],
+    'UPDATE Items SET item_name = ?, item_description = ?, rent_price = ?, availability = ?, image_url = ?, category_id = ?, deposit = ?, item_count = ? WHERE item_id = ?', // Included item_count in the query
+    [item_name, item_description, rent_price, availability, image_url, category_id, deposit, item_count, id], // Added item_count to the parameters
     callback
   );
 };
