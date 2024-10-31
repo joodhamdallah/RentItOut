@@ -35,12 +35,14 @@ const deleteItem = (id) => {
     const query = 'DELETE FROM Items WHERE item_id = ?';
     db.query(query, [id], (err, results) => {
       if (err) {
-        return reject(err); // Rejects the Promise if an error occurs
+        return reject(err);
       }
-      resolve(results.affectedRows > 0); // Resolves with `true` if an item was deleted, `false` if not
+      resolve(results.affectedRows > 0); // Resolves true if an item was deleted, false otherwise
     });
   });
 };
+
+
 
 
 module.exports = { getAllItems, getItemById, createItem, updateItem, deleteItem };
