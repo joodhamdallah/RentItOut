@@ -44,23 +44,21 @@ exports.updateItem = (req, res) => {
   });
 };
 
-
 // Delete an item
 exports.deleteItem = async (req, res) => {
-  const id = req.params.id;
+  const itemId = req.params.id;
 
   try {
-      const result = await Item.deleteItem(id); 
-      // Check if any rows were affected
-      if (result.affectedRows === 0) {
-          return res.status(404).json({ success: false, message: 'Item not found' });
-      }
-
-      res.status(200).json({ success: true, message: 'Item deleted successfully' });
-  } catch (err) {
-      console.error("Error deleting item:", err);
-      res.status(500).json({ success: false, message: 'Failed to delete item', error: err });
+    const success = await Item.deleteItem(itemId);
+    if (!success) {
+      return res.status(404).json({ success: false, message: 'Item not found' });
+    }
+    res.status(200).json({ success: true, message: 'Item deleted successfully' });
+  } catch (error) {
+    console.error("Error deleting item:", error);
+    res.status(500).json({ success: false, message: 'Failed to delete item', error });
   }
 };
+
 
 
