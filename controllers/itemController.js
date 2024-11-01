@@ -1,4 +1,4 @@
-const Item = require('../models/Item');
+const ItemModel = require('../models/Item'); 
 const CategoryModel = require('../models/Category'); 
 
 // List all items
@@ -12,17 +12,21 @@ exports.listItems = (req, res) => {
 };
 
 // Get item by ID
-exports.getItem = (req, res) => {
-  const id = req.params.id;
-  Item.getItemById(id, (err, result) => {
-    if (err) {
-      return res.status(500).json({ error: 'Failed to retrieve item' });
+exports.getItemById = async (req, res) => {
+  const itemId = req.params.id; // Get the item ID from the request parameters
+
+  try {
+    const item = await ItemModel.getItemById(itemId);
+
+    if (!item) {
+      return res.status(404).json({ error: 'Item not found' });
     }
-    if (!result) {
-      return res.status(404).json({ error: `Item with ID ${id} not found` });
-    }
-    res.status(200).json(result);
-  });
+
+    res.status(200).json({ item });
+  } catch (err) {
+    console.error('Error retrieving item:', err);
+    res.status(500).json({ error: 'Failed to retrieve item' });
+  }
 };
 
 

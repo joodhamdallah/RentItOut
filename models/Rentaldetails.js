@@ -1,7 +1,7 @@
 const db = require('../config/database');
 
 class RentalDetails {
-  // Create new rental details
+
   static createRentalDetails(data) {
     return new Promise((resolve, reject) => {
       const { item_id, quantity, rental_date, return_date, subtotal } = data;
