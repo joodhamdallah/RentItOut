@@ -18,6 +18,9 @@ exports.getItem = (req, res) => {
     if (err) {
       return res.status(500).json({ error: 'Failed to retrieve item' });
     }
+    if (!result) {
+      return res.status(404).json({ error: `Item with ID ${id} not found` });
+    }
     res.status(200).json(result);
   });
 };
@@ -27,6 +30,7 @@ exports.getItem = (req, res) => {
 exports.createItem = async (req, res) => {
   const itemData = req.body;
   const { category_id } = itemData; // take cat_id from the request body
+  itemData.user_id = req.userId; // Add user_id from the verified token to item data
 
   try {
     //Create the new item
@@ -46,9 +50,18 @@ exports.createItem = async (req, res) => {
 };
 
 // Update item details
-exports.updateItem = (req, res) => {
+exports.updateItem = async(req, res) => {
   const id = req.params.id;
-  const itemData = req.body;
+  const itemData = req.body; // Only include fields that need to be updated
+
+    // Check if the provided category_id is valid
+    if (itemData.category_id) {
+      const categoryExists = await CategoryModel.getCategoryById(itemData.category_id);
+      if (!categoryExists) {
+        return res.status(404).json({ error: `Category with ID ${itemData.category_id} not found` });
+      }
+    }
+
   Item.updateItem(id, itemData, (err, result) => {
     if (err) {
       return res.status(500).json({ error: 'Failed to update item' });
@@ -56,6 +69,7 @@ exports.updateItem = (req, res) => {
     res.status(200).json({ message: 'Item updated successfully' });
   });
 };
+
 
 // Delete an item
 exports.deleteItem = async (req, res) => {
@@ -71,6 +85,18 @@ exports.deleteItem = async (req, res) => {
     console.error("Error deleting item:", error);
     res.status(500).json({ success: false, message: 'Failed to delete item', error });
   }
+};
+
+// Get items by user ID
+exports.getItemsByUser = (req, res) => {
+  const userId = req.userId;  // Retrieve userId from the verified token
+
+  Item.getItemsByUser(userId, (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Failed to retrieve items for the user' });
+    }
+    res.status(200).json(results);
+  });
 };
 
 

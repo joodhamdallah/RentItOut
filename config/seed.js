@@ -6,7 +6,8 @@ const insertRoles = () => {
   const roles = [
     [1, 'Admin', 'Platform administrator'],         // Admin with role_id = 1
     [2, 'Vendor', 'Offers items for rent'],         // Vendor with role_id = 2
-    [3, 'Customer', 'Can rent items from vendors']  // Customer with role_id = 3
+    [3, 'Customer', 'Can rent items from vendors'],  // Customer with role_id = 3
+    [4, 'Insurance Team', 'Manages insurance policies for rented items'] //Insurance team with role_id = 4
   ];
 
   roles.forEach(role => {
@@ -120,35 +121,44 @@ const insertCategories = () => {
 };
 
 // Function to insert fake data into Items table with dynamic category_id
+// Function to insert fake data into Items table with dynamic category_id and user_id
 const insertItems = () => {
-  connection.query('SELECT category_id FROM Categories', (err, results) => {
+  connection.query('SELECT category_id FROM Categories', (err, categoryResults) => {
     if (err) throw err;
-    const categoryIds = results.map(category => category.category_id);
+    const categoryIds = categoryResults.map(category => category.category_id);
 
-    for (let i = 0; i < 10; i++) {
-      const randomCategoryId = categoryIds[Math.floor(Math.random() * categoryIds.length)];
-      const fakeItem = [
-        faker.commerce.productName(),
-        faker.commerce.productDescription(),
-        faker.commerce.price(),
-        faker.datatype.boolean(),
-        faker.image.url(),
-        randomCategoryId,
-        faker.commerce.price(50, 200, 2), // deposit
-        faker.number.int({ min: 1, max: 20 }) // item_count 
-      ];
+    connection.query('SELECT user_id FROM Users', (err, userResults) => {
+      if (err) throw err;
+      const userIds = userResults.map(user => user.user_id);
 
-      connection.query(
-        'INSERT INTO Items (item_name, item_description, price_per_day, availability, image_url, category_id, deposit, item_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        fakeItem,
-        (err) => {
-          if (err) throw err;
-          console.log(`Item ${fakeItem[0]} inserted`);
-        }
-      );
-    }
+      for (let i = 0; i < 10; i++) {
+        const randomCategoryId = categoryIds[Math.floor(Math.random() * categoryIds.length)];
+        const randomUserId = userIds[Math.floor(Math.random() * userIds.length)];
+        const fakeItem = [
+          faker.commerce.productName(),
+          faker.commerce.productDescription(),
+          faker.commerce.price(10, 100, 2),  // Adjusted to generate realistic price per day
+          faker.datatype.boolean(),
+          faker.image.url(),
+          randomCategoryId,
+          faker.commerce.price(50, 200, 2), // Deposit
+          faker.number.int({ min: 1, max: 20 }), // item_count
+          randomUserId
+        ];
+
+        connection.query(
+          'INSERT INTO Items (item_name, item_description, price_per_day, availability, image_url, category_id, deposit, item_count, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          fakeItem,
+          (err) => {
+            if (err) throw err;
+            console.log(`Item ${fakeItem[0]} inserted`);
+          }
+        );
+      }
+    });
   });
 };
+
 
 // Function to insert fake data into Rentals table with dynamic user_id
 const insertRentals = () => {
@@ -159,14 +169,13 @@ const insertRentals = () => {
     for (let i = 0; i < 6; i++) {
       const randomUserId = userIds[Math.floor(Math.random() * userIds.length)];
       const fakeRental = [
-        faker.date.past(),
-        faker.date.future(),
+        
         randomUserId,
         faker.helpers.arrayElement(['Delivery', 'Pickup'])
       ];
 
       connection.query(
-        'INSERT INTO Rentals (rental_date, return_date, user_id, logistic_type) VALUES (?, ?, ?, ?)',
+        'INSERT INTO Rentals ( user_id, logistic_type) VALUES (?, ?)',
         fakeRental,
         (err) => {
           if (err) throw err;
@@ -194,11 +203,13 @@ const insertRentalDetails = () => {
           randomRentalId,
           randomItemId,
           faker.number.int({ min: 1, max: 5 }),
+          faker.date.past(),
+          faker.date.future(),
           faker.commerce.price()
         ];
 
         connection.query(
-          'INSERT INTO Rental_details (rental_id, item_id, quantity, subtotal) VALUES (?, ?, ?, ?)',
+          'INSERT INTO Rental_details (rental_id, item_id, quantity, rental_date, return_date, subtotal) VALUES (?, ?, ?, ?, ?, ?)',
           fakeRentalDetail,
           (err) => {
             if (err) throw err;
@@ -296,32 +307,34 @@ const insertBills = () => {
   };
   
 
-// Function to insert fake data into Returning_Items table with dynamic category_id
-const insertReturningItems = () => {
-  connection.query('SELECT category_id FROM Categories', (err, results) => {
-    if (err) throw err;
-    const categoryIds = results.map(category => category.category_id);
-
-    for (let i = 0; i < 5; i++) {
-      const randomCategoryId = categoryIds[Math.floor(Math.random() * categoryIds.length)];
-      const fakeReturningItem = [
-        faker.commerce.productName(),
-        faker.helpers.arrayElement(['Good', 'Damaged', 'Needs Replacement']),
-        faker.commerce.price(20, 150, 2),
-        randomCategoryId
-      ];
-
-      connection.query(
-        'INSERT INTO Returning_Items (item_name, status_for_item, replacement_price, category_id) VALUES (?, ?, ?, ?)',
-        fakeReturningItem,
-        (err) => {
-          if (err) throw err;
-          console.log(`Returning item ${fakeReturningItem[0]} inserted`);
-        }
-      );
-    }
-  });
-};
+  const insertReturningItems = () => {
+    connection.query('SELECT rental_item_id FROM Rental_details', (err, results) => {
+      if (err) throw err;
+      const rentalItemIds = results.map(item => item.rental_item_id);
+  
+      for (let i = 0; i < 5; i++) {
+        const randomRentalItemId = rentalItemIds[Math.floor(Math.random() * rentalItemIds.length)];
+        const fakeReturningItem = [
+          faker.commerce.productName(),
+          faker.helpers.arrayElement(['Excellent','Good', 'Damaged', 'Needs Replacement']),
+          faker.commerce.price(20, 150, 2),
+          faker.date.future(),
+          randomRentalItemId,
+          faker.commerce.price(5, 50, 2)  // Random overtime charge between 5 and 50 with 2 decimal places
+        ];
+  
+        connection.query(
+          'INSERT INTO Returning_Items (item_name, status_for_item, returned_amount, actual_return_date, rental_item_id, overtime_charge) VALUES (?, ?, ?, ?, ?, ?)',
+          fakeReturningItem,
+          (err) => {
+            if (err) throw err;
+            console.log(`Returning item ${fakeReturningItem[0]} inserted`);
+          }
+        );
+      }
+    });
+  };
+  
 
 // Call the insert functions sequentially
 insertRoles();

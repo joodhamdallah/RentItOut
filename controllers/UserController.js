@@ -1,4 +1,5 @@
 const UserModel = require('../models/User');
+const ItemModel = require('../models/Item');
 
 class UserController {
     // Retrieve all users
@@ -77,6 +78,9 @@ class UserController {
             if (!user) {
                 return res.status(404).json({ message: 'User not found' });
             }
+           // Set user_id to NULL for all items related to this user
+            await ItemModel.nullifyUserIdInItems(id);        
+            
             await UserModel.deleteUser(id);
             res.status(200).json({ message: 'User deleted successfully' });
         } catch (error) {
