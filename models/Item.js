@@ -7,9 +7,20 @@ class ItemModel {
   }
 
   // Retrieve a single item by ID
-  static getItemById(id, callback) {
-    db.query('SELECT * FROM Items WHERE item_id = ?', [id], callback);
+  static getItemById(id) {
+    return new Promise((resolve, reject) => {
+      db.query('SELECT * FROM Items WHERE item_id = ?', [id], (err, results) => {
+        if (err) {
+          return reject(err); 
+        }
+        if (results.length === 0) {
+          return resolve(null); 
+        }
+        resolve(results[0]); 
+      });
+    });
   }
+
 
 // Create a new item
 static createItem(itemData) {

@@ -4,7 +4,7 @@ const itemController = require('../controllers/itemController');
 const { verifyToken,authorizeRole } = require('../middleware/authMiddleware');
 
 router.get('/items', itemController.listItems);          // List all items
-router.get('/items/:id', itemController.getItem);        // Get item by ID
+router.get('/items/:id', itemController.getItemById);
 router.get('/user/items', verifyToken ,authorizeRole('admin','vendor'), itemController.getItemsByUser);  // List items for the authenticated user
 
 router.post('/items', verifyToken, authorizeRole('admin','vendor'),itemController.createItem);        // Create a new item

@@ -7,6 +7,8 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes'); 
 const categoryRoutes = require('./routes/categoryRoutes');
 const itemRoutes = require('./routes/itemRoutes');
+const rentalRoutes = require('./routes/rentalsRoutes');
+
 
 
 
@@ -17,6 +19,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api', categoryRoutes);
 app.use('/api', itemRoutes);  
 app.use('/api', userRoutes); 
+app.use('/api', rentalRoutes); 
+
 
 
 const PORT = 3000;
