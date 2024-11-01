@@ -139,7 +139,7 @@ const insertItems = () => {
       ];
 
       connection.query(
-        'INSERT INTO Items (item_name, item_description, rent_price, availability, image_url, category_id, deposit, item_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO Items (item_name, item_description, price_per_day, availability, image_url, category_id, deposit, item_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
         fakeItem,
         (err) => {
           if (err) throw err;

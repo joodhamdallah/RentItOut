@@ -13,11 +13,11 @@ class ItemModel {
 
 // Create a new item
 static createItem(itemData) {
-  const { item_name, item_description, rent_price, availability, image_url, category_id, deposit, item_count } = itemData; 
+  const { item_name, item_description, price_per_day, availability, image_url, category_id, deposit, item_count } = itemData; 
   return new Promise((resolve, reject) => {
     db.query(
-      'INSERT INTO Items (item_name, item_description, rent_price, availability, image_url, category_id, deposit, item_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', 
-      [item_name, item_description, rent_price, availability, image_url, category_id, deposit, item_count], 
+      'INSERT INTO Items (item_name, item_description, price_per_day, availability, image_url, category_id, deposit, item_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', 
+      [item_name, item_description, price_per_day, availability, image_url, category_id, deposit, item_count], 
       (err, result) => {
         if (err) {
           return reject(err); 
@@ -30,10 +30,10 @@ static createItem(itemData) {
 
   // Update item details
   static updateItem(id, itemData, callback) {
-    const { item_name, item_description, rent_price, availability, image_url, category_id, deposit, item_count } = itemData; 
+    const { item_name, item_description, price_per_day, availability, image_url, category_id, deposit, item_count } = itemData; 
     db.query(
-      'UPDATE Items SET item_name = ?, item_description = ?, rent_price = ?, availability = ?, image_url = ?, category_id = ?, deposit = ?, item_count = ? WHERE item_id = ?', 
-      [item_name, item_description, rent_price, availability, image_url, category_id, deposit, item_count, id], 
+      'UPDATE Items SET item_name = ?, item_description = ?, price_per_day = ?, availability = ?, image_url = ?, category_id = ?, deposit = ?, item_count = ? WHERE item_id = ?', 
+      [item_name, item_description, price_per_day, availability, image_url, category_id, deposit, item_count, id], 
       callback
     );
   }
