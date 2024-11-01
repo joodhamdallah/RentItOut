@@ -1,4 +1,4 @@
-const CategoryModel = require('../models/Category'); // Adjust this path based on your folder structure
+const CategoryModel = require('../models/Category'); 
 
 class CategoryController {
     static async listAllCategories(req, res) {
@@ -58,23 +58,24 @@ class CategoryController {
             res.status(500).json({ success: false, message: 'Failed to update category', error });
         }
     }
-    
 
     static async addCategory(req, res) {
-        const { category_name, category_description } = req.body;
+        const { category_name, category_description, number_of_items } = req.body;
 
-        if (!category_name || !category_description) {
-            return res.status(400).json({ success: false, message: 'Category name and description are required.' });
+        // Check if required fields are provided
+        if (!category_name || !category_description || number_of_items === undefined) {
+            return res.status(400).json({ success: false, message: 'Category name, description, and number of items are required.' });
         }
-
+    
         try {
-            const newCategory = await CategoryModel.createCategory({ category_name, category_description });
+            const newCategory = await CategoryModel.createCategory({ category_name, category_description, number_of_items });
             res.status(201).json({ success: true, data: newCategory });
         } catch (error) {
             console.error(error);
             res.status(500).json({ success: false, message: 'Failed to add category' });
         }
     }
+    
 
     static async deleteCategory(req, res) {
         const categoryId = req.params.id;
@@ -90,6 +91,7 @@ class CategoryController {
             res.status(500).json({ success: false, message: 'Failed to delete category', error });
         }
     }
+    
 }
 
 module.exports = CategoryController;
