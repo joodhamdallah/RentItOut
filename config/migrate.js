@@ -19,6 +19,7 @@ const createTables = [
         address TEXT,
         password_reset_token VARCHAR(255),  
         password_reset_expires DATETIME,
+        password_changed_at DATETIME DEFAULT NULL,
         FOREIGN KEY (role_id) REFERENCES Roles(role_id) ON DELETE CASCADE
     );`,
 
@@ -34,7 +35,7 @@ const createTables = [
     item_id INT PRIMARY KEY AUTO_INCREMENT,
     item_name VARCHAR(255),
     item_description TEXT,
-    rent_price DECIMAL(10, 2),
+    price_per_day DECIMAL(10, 2),
     availability BOOLEAN,
     image_url TEXT,
     category_id INT,

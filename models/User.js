@@ -86,9 +86,10 @@ class UserModel {
         // Update user password and clear reset fields
         static async updateUserPassword(userId, newPassword) {
             const hashedPassword = await bcrypt.hash(newPassword, 10);
+            const currentTimestamp = new Date(); // Get current date and time
             return new Promise((resolve, reject) => {
-                const query = 'UPDATE Users SET password = ?, password_reset_token = NULL, password_reset_expires = NULL WHERE user_id = ?';
-                connection.query(query, [hashedPassword, userId], (err, results) => {
+                const query = 'UPDATE Users SET password = ?, password_reset_token = NULL, password_reset_expires = NULL, password_changed_at = ? WHERE user_id = ?';
+                connection.query(query, [hashedPassword, currentTimestamp, userId], (err, results) => {
                     if (err) {
                         return reject(err);
                     }
@@ -145,7 +146,27 @@ class UserModel {
             });
         });
     }
-    
+    static async hasPasswordChangedSince(userId, iat) {
+        return new Promise((resolve, reject) => {
+            const query = 'SELECT password_changed_at FROM Users WHERE user_id = ?';
+            connection.query(query, [userId], (err, results) => {
+                if (err) {
+                    return reject(err);
+                }
+                if (results.length === 0) {
+                    return resolve(false); // No user found, assume password has not changed
+                }
+
+                const passwordChangedAt = results[0].password_changed_at;
+                if (passwordChangedAt) {
+                    const passwordChangedAtDate = new Date(passwordChangedAt);
+                    return resolve(passwordChangedAtDate.getTime() > iat * 1000); // Compare timestamps
+                }
+                
+                return resolve(false); // No change recorded
+            });
+        });
+    }
 }
 
 
