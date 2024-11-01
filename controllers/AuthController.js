@@ -55,7 +55,7 @@ class AuthController {
                 maxAge: 3600000  //1 hour
             });
 
-            res.status(200).json({ message: 'Login successful' });
+            res.status(200).json({ message: 'Login successful'});
         } catch (error) {
             res.status(500).json({ message: 'Error logging in', error });
         }
@@ -149,11 +149,11 @@ class AuthController {
         });
         }     
         await UserModel.updateUserPassword(user.user_id, newPassword);
-        res.status(200).json({ message: 'Password changed successfully.' });
+        res.status(200).json({
+            message: 'Password changed successfully. Please log in again.',
+            loginUrl: 'http://localhost:3000/api/auth/login' 
+        });
     }
-
-    
-    
 
 }
 

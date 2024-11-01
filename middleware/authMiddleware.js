@@ -11,7 +11,11 @@ const roleMapping = {
 
 const verifyToken = async (req, res, next) => {
     const token = req.cookies.jwt; // Get the token from cookies
-    
+   
+    //If the token isn't send by cookie
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+        token = req.headers.authorization.split(' ')[1];
+    }
     if (!token) {
         return res.status(403).json({ message: 'No token provided, please log in to get access' });
     }
@@ -22,6 +26,12 @@ const verifyToken = async (req, res, next) => {
         const currentUser = await UserModel.findUserById(decoded.id);
         if (!currentUser) {
             return res.status(401).json({ message: 'The user belonging to this token no longer exists' });
+        }
+
+        // Check if the user changed their password after the token was issued
+        const passwordChanged = await UserModel.hasPasswordChangedSince(decoded.id, decoded.iat);
+        if (passwordChanged) {
+            return res.status(401).json({ message: 'Password was changed recently. Please log in again.' });
         }
 
         // Attach user data to the request
