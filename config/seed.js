@@ -1,38 +1,83 @@
 const connection = require('./database');  // Import the db connection
 const { faker } = require('@faker-js/faker');
-
+const bcrypt = require('bcrypt');
 // Function to insert data into Roles table
 const insertRoles = () => {
   const roles = [
-    ['Admin', 'Administrator role'],
-    ['Dealer', 'Owner who offers items for renting'],
-    ['Customer', 'Regular user role who can rent items from the website']
+    [1, 'Admin', 'Platform administrator'],         // Admin with role_id = 1
+    [2, 'Vendor', 'Offers items for rent'],         // Vendor with role_id = 2
+    [3, 'Customer', 'Can rent items from vendors']  // Customer with role_id = 3
   ];
 
   roles.forEach(role => {
     connection.query(
-      'INSERT INTO Roles (role_name, role_description) VALUES (?, ?)',
+      'INSERT INTO Roles (role_id, role_name, role_description) VALUES (?, ?, ?)',
       role,
       (err) => {
         if (err) throw err;
-        console.log(`Role ${role[0]} inserted`);
+        console.log(`Role ${role[1]} inserted`);
       }
     );
   });
 };
-
 // Function to insert fake data into Users table with dynamic role_id
-const insertUsers = () => {
-  connection.query('SELECT role_id FROM Roles', (err, results) => {
+const insertUsers = async () => {
+  // Retrieve role IDs for admin, customer, and vendor roles
+  connection.query('SELECT role_id, role_name FROM Roles', async (err, results) => {
     if (err) throw err;
-    const roleIds = results.map(role => role.role_id);
 
-    for (let i = 0; i < 5; i++) {
-      const randomRoleId = roleIds[Math.floor(Math.random() * roleIds.length)];
+    // Map roles by role name to find correct IDs
+    const roleMap = {};
+    results.forEach(role => {
+      roleMap[role.role_name.toLowerCase()] = role.role_id;
+    });
+
+    // Predefined users with respective roles
+    const users = [
+      // Admins
+      { username: 'admin1', email: 'admin1@example.com', password: await bcrypt.hash('AdminPass123', 10), role: 'admin', phone: '123-456-7890', firstName: 'Admin', lastName: 'One', address: '123 Admin St' },
+      { username: 'admin2', email: 'admin2@example.com', password: await bcrypt.hash('AdminPass456', 10), role: 'admin', phone: '234-567-8901', firstName: 'Admin', lastName: 'Two', address: '456 Admin Ave' },
+      
+      // Customers
+      { username: 'customer1', email: 'customer1@example.com', password: await bcrypt.hash('CustPass123', 10), role: 'customer', phone: '345-678-9012', firstName: 'Customer', lastName: 'One', address: '123 Customer St' },
+      { username: 'customer2', email: 'customer2@example.com', password: await bcrypt.hash('CustPass456', 10), role: 'customer', phone: '456-789-0123', firstName: 'Customer', lastName: 'Two', address: '456 Customer Ave' },
+      
+      // Vendors
+      { username: 'vendor1', email: 'vendor1@example.com', password: await bcrypt.hash('VendorPass123', 10), role: 'vendor', phone: '567-890-1234', firstName: 'Vendor', lastName: 'One', address: '123 Vendor St' },
+      { username: 'vendor2', email: 'vendor2@example.com', password: await bcrypt.hash('VendorPass456', 10), role: 'vendor', phone: '678-901-2345', firstName: 'Vendor', lastName: 'Two', address: '456 Vendor Ave' }
+    ];
+
+    // Insert each predefined user
+    users.forEach(user => {
+      const userData = [
+        user.username,
+        user.email,
+        user.password,
+        roleMap[user.role],  // Map role to its ID
+        user.phone,
+        user.firstName,
+        user.lastName,
+        user.address
+      ];
+
+      connection.query(
+        'INSERT INTO Users (user_name, email, password, role_id, phone_number, first_name, last_name, address) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        userData,
+        (err) => {
+          if (err) throw err;
+          console.log(`User ${user.username} inserted successfully`);
+        }
+      );
+    });
+
+    // Generate 4 random users with random roles
+    for (let i = 0; i < 4; i++) {
+      const randomRoleId = roleMap[Object.keys(roleMap)[Math.floor(Math.random() * Object.keys(roleMap).length)]];
+
       const fakeUser = [
         faker.internet.userName(),
         faker.internet.email(),
-        faker.internet.password(),
+        await bcrypt.hash(faker.internet.password(), 10),  // Hash the fake password
         randomRoleId,
         faker.phone.number(),
         faker.person.firstName(),
@@ -45,13 +90,12 @@ const insertUsers = () => {
         fakeUser,
         (err) => {
           if (err) throw err;
-          console.log(`User ${fakeUser[0]} inserted`);
+          console.log(`Random user ${fakeUser[0]} inserted successfully`);
         }
       );
     }
   });
 };
-
 // Function to insert fake data into Categories table
 const insertCategories = () => {
   const categories = [
