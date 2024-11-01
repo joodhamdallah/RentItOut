@@ -22,9 +22,4 @@ dropTables.forEach((query, index) => {
         console.log(`Table at index ${index} dropped successfully!`);
     });
 });
-
-<<<<<<< HEAD
 connection.end();  // Close the connection after executing the queries
-=======
-connection.end();  // Close the connection after executing the queries
->>>>>>> 46eba4cbb0cc3552a89fc607ab36a1e89c4e1385
