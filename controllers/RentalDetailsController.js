@@ -25,7 +25,6 @@ exports.createRentalDetails = async (req, res) => {
     }
 
     try {
-       
         const item = await Item.getItemById(item_id);
 
         // Check if item was found
@@ -34,13 +33,16 @@ exports.createRentalDetails = async (req, res) => {
             return res.status(404).json({ error: 'Item not found' });
         }
 
+        // Check if enough items are available
+        if (item.item_count < quantity) {
+            return res.status(400).json({ error: 'Not enough items available for rental' });
+        }
+
         const pricePerDay = parseFloat(item.price_per_day); 
         const deposit = parseFloat(item.deposit); 
 
-        // Calculate the number of rental days (including the start day) <<<<MAKE SURE U DO nmp instsll for moment library>>>>  
+        // Calculate the number of rental days (including the start day)
         const rentalDays = moment(return_date).diff(moment(rental_date), 'days') + 1;
-
-      
 
         // Calculate subtotal
         const subtotal = (pricePerDay * rentalDays * quantity) + deposit;
@@ -61,6 +63,9 @@ exports.createRentalDetails = async (req, res) => {
             return_date,
             subtotal,
         });
+
+        // Decrement item_count after successful rental creation
+        await Item.updateItem(item_id, { item_count: item.item_count - quantity }); // Update item_count
 
         res.status(201).json({
             message: 'Rental details created successfully', 
