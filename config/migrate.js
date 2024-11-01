@@ -41,13 +41,14 @@ const createTables = [
     category_id INT,
     deposit DECIMAL(10, 2),
     item_count INT DEFAULT 0,  -- New column for counting items
-    FOREIGN KEY (category_id) REFERENCES Categories(category_id)
+    user_id INT,
+    FOREIGN KEY (category_id) REFERENCES Categories(category_id),
+    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+
  );`,
 
     `CREATE TABLE IF NOT EXISTS Rentals (
         rental_id INT PRIMARY KEY AUTO_INCREMENT,
-        rental_date DATE,
-        return_date DATE,
         user_id INT,
         logistic_type VARCHAR(255),
         FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
@@ -58,6 +59,8 @@ const createTables = [
         rental_id INT,
         item_id INT,
         quantity INT,
+        rental_date DATE,
+        return_date DATE,
         subtotal DECIMAL(10, 2),
         FOREIGN KEY (rental_id) REFERENCES Rentals(rental_id) ON DELETE CASCADE,
         FOREIGN KEY (item_id) REFERENCES Items(item_id) ON DELETE CASCADE
@@ -91,9 +94,11 @@ const createTables = [
         RItem_id INT PRIMARY KEY AUTO_INCREMENT,
         item_name VARCHAR(255),
         status_for_item VARCHAR(255),
-        replacement_price DECIMAL(10, 2),
-        category_id INT,
-        FOREIGN KEY (category_id) REFERENCES Categories(category_id) ON DELETE CASCADE
+        returned_amount DECIMAL(10, 2),
+        actual_return_date DATE,
+        rental_item_id INT,
+        overtime_charge DECIMAL(10, 2),
+        FOREIGN KEY (rental_item_id) REFERENCES Rental_details(rental_item_id) ON DELETE CASCADE
     );`
 ];
 

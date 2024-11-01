@@ -13,11 +13,11 @@ class ItemModel {
 
 // Create a new item
 static createItem(itemData) {
-  const { item_name, item_description, price_per_day, availability, image_url, category_id, deposit, item_count } = itemData; 
+  const { item_name, item_description, price_per_day, availability, image_url, category_id, deposit, item_count, user_id } = itemData; 
   return new Promise((resolve, reject) => {
     db.query(
-      'INSERT INTO Items (item_name, item_description, price_per_day, availability, image_url, category_id, deposit, item_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', 
-      [item_name, item_description, price_per_day, availability, image_url, category_id, deposit, item_count], 
+      'INSERT INTO Items (item_name, item_description, price_per_day, availability, image_url, category_id, deposit, item_count,user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)', 
+      [item_name, item_description, price_per_day, availability, image_url, category_id, deposit, item_count,user_id], 
       (err, result) => {
         if (err) {
           return reject(err); 
@@ -28,15 +28,22 @@ static createItem(itemData) {
   });
 }
 
-  // Update item details
-  static updateItem(id, itemData, callback) {
-    const { item_name, item_description, price_per_day, availability, image_url, category_id, deposit, item_count } = itemData; 
-    db.query(
-      'UPDATE Items SET item_name = ?, item_description = ?, price_per_day = ?, availability = ?, image_url = ?, category_id = ?, deposit = ?, item_count = ? WHERE item_id = ?', 
-      [item_name, item_description, price_per_day, availability, image_url, category_id, deposit, item_count, id], 
-      callback
-    );
-  }
+// Update item details
+static updateItem(id, itemData, callback) {
+  // Extract keys and values from itemData for dynamic query generation
+  const fields = Object.keys(itemData);
+  const values = Object.values(itemData);
+
+  // Construct dynamic query string
+  const setClause = fields.map(field => `${field} = ?`).join(', ');
+  const sql = `UPDATE Items SET ${setClause} WHERE item_id = ?`;
+
+  // Add id as the last parameter for WHERE clause
+  values.push(id);
+
+  db.query(sql, values, callback);
+}
+
 
 
 // Delete an item
@@ -76,5 +83,20 @@ static deleteItem(itemId) {
     }
   });
 }
+  // Retrieve items by user_id
+  static getItemsByUser(userId, callback) {
+    db.query('SELECT * FROM Items WHERE user_id = ?', [userId], callback);
+  }
+
+  static nullifyUserIdInItems(userId) {
+    return new Promise((resolve, reject) => {
+      db.query('UPDATE Items SET user_id = NULL WHERE user_id = ?', [userId], (err, result) => {
+        if (err) {
+          return reject(err);
+        }
+        resolve(result.affectedRows > 0); // Return true if any rows were updated
+      });
+    });
+  }
 }
 module.exports = ItemModel;
