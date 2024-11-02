@@ -1,18 +1,18 @@
 const connection = require('./database');  // Import your database connection
 
 const dropTables = [
-    
-    'DROP TABLE IF EXISTS Feedbacks',
-    'DROP TABLE IF EXISTS Bills',
-    'DROP TABLE IF EXISTS Discounts',
-    'DROP TABLE IF EXISTS Rental_details',
-    'DROP TABLE IF EXISTS Rentals',
-    'DROP TABLE IF EXISTS Payments',
-    'DROP TABLE IF EXISTS Items',
-    'DROP TABLE IF EXISTS Returning_Items',
-    'DROP TABLE IF EXISTS Categories',
-    'DROP TABLE IF EXISTS Users',
-    'DROP TABLE IF EXISTS Roles'
+
+    'DROP TABLE IF EXISTS Feedbacks',         // Depends on Rentals, Users
+    'DROP TABLE IF EXISTS Bills',             // Depends on Rentals, Payments
+    'DROP TABLE IF EXISTS Returning_Items',   // Depends on Rental_details, Items
+    'DROP TABLE IF EXISTS Rental_details',    // Depends on Rentals, Items
+    'DROP TABLE IF EXISTS Rentals',           // Depends on Users, Discounts
+    'DROP TABLE IF EXISTS Discounts',         // No dependencies
+    'DROP TABLE IF EXISTS Payments',          // No dependencies
+    'DROP TABLE IF EXISTS Items',             // Depends on Categories, Users
+    'DROP TABLE IF EXISTS Categories',        // No dependencies
+    'DROP TABLE IF EXISTS Users',             // Depends on Roles
+    'DROP TABLE IF EXISTS Roles' 
 ];
 
 dropTables.forEach((query, index) => {
