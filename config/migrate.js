@@ -100,14 +100,16 @@ const createTables = [
     );`,
 
     `CREATE TABLE IF NOT EXISTS Returning_Items (
-        RItem_id INT PRIMARY KEY AUTO_INCREMENT,
-        item_name VARCHAR(255),
-        status_for_item VARCHAR(255),
-        returned_amount DECIMAL(10, 2),
-        actual_return_date DATE,
-        rental_item_id INT,
-        overtime_charge DECIMAL(10, 2),
-        FOREIGN KEY (rental_item_id) REFERENCES Rental_details(rental_item_id) ON DELETE CASCADE
+     RItem_id INT PRIMARY KEY AUTO_INCREMENT,
+     item_name VARCHAR(255),
+     status_for_item VARCHAR(255),
+     returned_amount DECIMAL(10, 2),
+     actual_return_date DATE,
+     rental_item_id INT,
+     item_id INT,  -- Adding item_id as a foreign key
+     overtime_charge DECIMAL(10, 2),
+     FOREIGN KEY (rental_item_id) REFERENCES Rental_details(rental_item_id) ON DELETE CASCADE,
+     FOREIGN KEY (item_id) REFERENCES Items(item_id) ON DELETE CASCADE
     );`
 ];
 
