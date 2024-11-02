@@ -120,8 +120,8 @@ const insertCategories = () => {
   });
 };
 
-// Function to insert fake data into Items table with dynamic category_id
-// Function to insert fake data into Items table with dynamic category_id and user_id
+
+//insert fake data into Items table with dynamic category_id and user_id
 const insertItems = () => {
   connection.query('SELECT category_id FROM Categories', (err, categoryResults) => {
     if (err) throw err;
@@ -137,7 +137,7 @@ const insertItems = () => {
         const fakeItem = [
           faker.commerce.productName(),
           faker.commerce.productDescription(),
-          faker.commerce.price(10, 100, 2),  // Adjusted to generate realistic price per day
+          faker.commerce.price(10, 100, 2),  //realistic price per day
           faker.datatype.boolean(),
           faker.image.url(),
           randomCategoryId,
@@ -160,7 +160,27 @@ const insertItems = () => {
 };
 
 
-// Function to insert fake data into Rentals table with dynamic user_id
+const insertDiscounts = () => {
+  const discounts = [
+    [1, 'Percentage Amount Discount', 10.00, 'Get 10% off any rental above $100.'], 
+    [2, 'Long-Term Rental Discount', 12.00, 'Get 12% off for rentals longer than 7 days.'], 
+    [3, 'Loyalty Discount', 5.00, 'Enjoy 5% off after 5 rentals.'], 
+    [4, 'First Purchase Discount', 15.00, 'Get 15% off your first rental.'] 
+  ];
+
+  discounts.forEach(discount => {
+    connection.query(
+      'INSERT INTO Discounts (discount_id, discount_name, discount_percentage, description) VALUES (?, ?, ?, ?)',
+      discount,
+      (err) => {
+        if (err) throw err;
+        console.log(`Discount ${discount[1]} inserted`);
+      }
+    );
+  });
+};
+
+// Function to insert fake data into Rentals table with dynamic user_id and discount_id
 const insertRentals = () => {
   connection.query('SELECT user_id FROM Users', (err, results) => {
     if (err) throw err;
@@ -168,23 +188,26 @@ const insertRentals = () => {
 
     for (let i = 0; i < 6; i++) {
       const randomUserId = userIds[Math.floor(Math.random() * userIds.length)];
+      const randomDiscountId = Math.floor(Math.random() * 4) + 1; // Random number between 1 and 4
+
       const fakeRental = [
-        
         randomUserId,
-        faker.helpers.arrayElement(['Delivery', 'Pickup'])
+        faker.helpers.arrayElement(['Delivery', 'Pickup']),
+        randomDiscountId 
       ];
 
       connection.query(
-        'INSERT INTO Rentals ( user_id, logistic_type) VALUES (?, ?)',
+        'INSERT INTO Rentals (user_id, logistic_type, discount_id) VALUES (?, ?, ?)',
         fakeRental,
         (err) => {
           if (err) throw err;
-          console.log(`Rental for user_id ${randomUserId} inserted`);
+          console.log(`Rental for user_id ${randomUserId} with discount_id ${randomDiscountId} inserted`);
         }
       );
     }
   });
 };
+
 
 // Function to insert fake data into Rental_details table with dynamic rental_id and item_id
 const insertRentalDetails = () => {
@@ -341,6 +364,7 @@ insertRoles();
 setTimeout(insertUsers, 2000);      // Ensure Roles are inserted before Users
 setTimeout(insertCategories, 4000);  // Categories
 setTimeout(insertItems, 6000);       // Items depends on Categories
+setTimeout(insertDiscounts, 6000); 
 setTimeout(insertRentals, 8000);     // Rentals depends on Users
 setTimeout(insertRentalDetails, 10000); // Rental_details depends on Rentals and Items
 setTimeout(insertFeedbacks, 12000);  // Feedbacks depends on Rentals and Users
