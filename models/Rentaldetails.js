@@ -1,6 +1,6 @@
 const db = require('../config/database');
 
-class RentalDetails {
+class RentalDetailsModel {
 
   static createRentalDetails(data) {
     return new Promise((resolve, reject) => {
@@ -19,4 +19,4 @@ class RentalDetails {
   }
 }
 
-module.exports = RentalDetails;
+module.exports = RentalDetailsModel;

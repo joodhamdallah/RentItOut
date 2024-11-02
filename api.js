@@ -1,5 +1,6 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
+const session = require('express-session');
 const app = express();
 require('dotenv').config({ path: './.env' });
 
@@ -16,6 +17,19 @@ const discountsRoutes = require('./routes/discountsRoutes');
 app.use(express.json());
 app.use(cookieParser());
 
+// Session middleware setup
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'mysecret', 
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false } 
+}));
+
+app.get('/api/debug/session', (req, res) => {
+  res.status(200).json({
+    session: req.session
+  });
+});
 app.use('/api/auth', authRoutes);  
 app.use('/api', categoryRoutes);
 app.use('/api', itemRoutes);  

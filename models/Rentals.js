@@ -15,6 +15,21 @@ class RentalsModel {
       );
     });
   }
+  // Get all rentals by a user
+  static getUserRentals(userId) {
+    return new Promise((resolve, reject) => {
+      db.query(
+        'SELECT * FROM Rentals WHERE user_id = ?',
+        [userId],
+        (err, results) => {
+          if (err) {
+            return reject(new Error('Failed to retrieve user rentals: ' + err.message));
+          }
+          resolve(results);
+        }
+      );
+    });
+  }
 }
 
 module.exports = RentalsModel;
