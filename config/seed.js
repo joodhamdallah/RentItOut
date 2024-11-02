@@ -329,34 +329,45 @@ const insertBills = () => {
     });
   };
   
-
   const insertReturningItems = () => {
-    connection.query('SELECT rental_item_id FROM Rental_details', (err, results) => {
+    // Fetch rental_item_id and item_id
+    connection.query('SELECT rental_item_id FROM Rental_details', (err, rentalResults) => {
       if (err) throw err;
-      const rentalItemIds = results.map(item => item.rental_item_id);
   
-      for (let i = 0; i < 5; i++) {
-        const randomRentalItemId = rentalItemIds[Math.floor(Math.random() * rentalItemIds.length)];
-        const fakeReturningItem = [
-          faker.commerce.productName(),
-          faker.helpers.arrayElement(['Excellent','Good', 'Damaged', 'Needs Replacement']),
-          faker.commerce.price(20, 150, 2),
-          faker.date.future(),
-          randomRentalItemId,
-          faker.commerce.price(5, 50, 2)  // Random overtime charge between 5 and 50 with 2 decimal places
-        ];
+      // Fetch item_ids from Items table
+      connection.query('SELECT item_id FROM Items', (err, itemResults) => {
+        if (err) throw err;
   
-        connection.query(
-          'INSERT INTO Returning_Items (item_name, status_for_item, returned_amount, actual_return_date, rental_item_id, overtime_charge) VALUES (?, ?, ?, ?, ?, ?)',
-          fakeReturningItem,
-          (err) => {
-            if (err) throw err;
-            console.log(`Returning item ${fakeReturningItem[0]} inserted`);
-          }
-        );
-      }
+        const rentalItemIds = rentalResults.map(item => item.rental_item_id);
+        const itemIds = itemResults.map(item => item.item_id);
+  
+        for (let i = 0; i < 5; i++) {
+          const randomRentalItemId = rentalItemIds[Math.floor(Math.random() * rentalItemIds.length)];
+          const randomItemId = itemIds[Math.floor(Math.random() * itemIds.length)]; // Get random item_id
+  
+          const fakeReturningItem = [
+            faker.commerce.productName(),
+            faker.helpers.arrayElement(['Excellent','Good', 'Damaged', 'Needs Replacement']),
+            faker.commerce.price(20, 150, 2),
+            faker.date.future(),
+            randomRentalItemId,
+            randomItemId, // Add the random item_id here
+            faker.commerce.price(5, 50, 2)  // Random overtime charge between 5 and 50 with 2 decimal places
+          ];
+  
+          connection.query(
+            'INSERT INTO Returning_Items (item_name, status_for_item, returned_amount, actual_return_date, rental_item_id, item_id, overtime_charge) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            fakeReturningItem,
+            (err) => {
+              if (err) throw err;
+              console.log(`Returning item ${fakeReturningItem[0]} inserted`);
+            }
+          );
+        }
+      });
     });
   };
+  
   
 
 // Call the insert functions sequentially
