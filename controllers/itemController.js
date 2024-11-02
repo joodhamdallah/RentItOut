@@ -3,7 +3,7 @@ const CategoryModel = require('../models/Category');
 
 // List all items
 exports.listItems = (req, res) => {
-  Item.getAllItems((err, results) => {
+  ItemModel.getAllItems((err, results) => {
     if (err) {
       return res.status(500).json({ error: 'Failed to retrieve items' });
     }
@@ -38,7 +38,7 @@ exports.createItem = async (req, res) => {
 
   try {
     //Create the new item
-    const result = await Item.createItem(itemData);
+    const result = await ItemModel.createItem(itemData);
 
     //Increment the number of items for the given cat_id
     const success = await CategoryModel.incrementNumberOfItems(category_id); 
@@ -66,7 +66,7 @@ exports.updateItem = async(req, res) => {
       }
     }
 
-  Item.updateItem(id, itemData, (err, result) => {
+  ItemModel.updateItem(id, itemData, (err, result) => {
     if (err) {
       return res.status(500).json({ error: 'Failed to update item' });
     }
@@ -80,7 +80,7 @@ exports.deleteItem = async (req, res) => {
   const itemId = req.params.id;
 
   try {
-    const success = await Item.deleteItem(itemId);
+    const success = await ItemModel.deleteItem(itemId);
     if (!success) {
       return res.status(404).json({ success: false, message: 'Item not found' });
     }
