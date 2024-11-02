@@ -47,11 +47,20 @@ const createTables = [
 
  );`,
 
+   `CREATE TABLE IF NOT EXISTS Discounts (
+        discount_id INT PRIMARY KEY AUTO_INCREMENT,
+        discount_name VARCHAR(255),
+        discount_percentage DECIMAL(5, 2) NOT NULL,  -- percentage value for the discount (10.00 for 10%)
+        description TEXT
+    );`,
+
     `CREATE TABLE IF NOT EXISTS Rentals (
         rental_id INT PRIMARY KEY AUTO_INCREMENT,
         user_id INT,
         logistic_type VARCHAR(255),
-        FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+        discount_id INT,  -- New column for discount_id
+        FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+        FOREIGN KEY (discount_id) REFERENCES Discounts(discount_id) ON DELETE SET NULL  -- null cuz discount is not always applied
     );`,
 
     `CREATE TABLE IF NOT EXISTS Rental_details (

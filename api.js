@@ -8,6 +8,7 @@ const userRoutes = require('./routes/userRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const itemRoutes = require('./routes/itemRoutes');
 const rentalRoutes = require('./routes/rentalsRoutes');
+const discountsRoutes = require('./routes/discountsRoutes');
 
 
 
@@ -20,6 +21,7 @@ app.use('/api', categoryRoutes);
 app.use('/api', itemRoutes);  
 app.use('/api', userRoutes); 
 app.use('/api', rentalRoutes); 
+app.use('/api', discountsRoutes);
 
 
 
