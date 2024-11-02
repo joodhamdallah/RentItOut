@@ -95,7 +95,7 @@ exports.deleteItem = async (req, res) => {
 exports.getItemsByUser = (req, res) => {
   const userId = req.userId;  // Retrieve userId from the verified token
 
-  Item.getItemsByUser(userId, (err, results) => {
+  ItemModel.getItemsByUser(userId, (err, results) => {
     if (err) {
       return res.status(500).json({ error: 'Failed to retrieve items for the user' });
     }
