@@ -250,11 +250,15 @@ class RentalController {
       return res.status(400).json({ error: 'Cart is empty. Please add items to the cart before checkout' });
     }
 
-    const { logistic_type, payment_method } = req.session.checkoutDetails || {};
+         const { logistic_type} = req.session.checkoutDetails || {};
+         if (!logistic_type ) {
+            return res.status(400).json({ error: 'Logistic type and required for confirmation' });
+          }
+    // const { logistic_type, payment_method } = req.session.checkoutDetails || {};
 
-    if (!logistic_type || !payment_method) {
-      return res.status(400).json({ error: 'Logistic type and payment method are required for confirmation' });
-    }
+    // if (!logistic_type || !payment_method) {
+    //   return res.status(400).json({ error: 'Logistic type and payment method are required for confirmation' });
+    // }
 
     try {
       const cartItems = req.session.cart;
@@ -263,11 +267,12 @@ class RentalController {
       const discountId = await RentalController.determineDiscount(userId, cartItems);
 
       // Save the complete rental order in the database
-      const rentalId = await RentalModel.createRental(userId, logistic_type, discountId);
+      const rentalId = await Rentals.createRental(userId, logistic_type, discountId);
+      console.log("rent id="+rentalId);
 
       // Save rental details for each item
       for (const item of cartItems) {
-        await RentalDetailsModel.createRentalDetails({
+        await RentalDetails.createRentalDetails({
           rental_id: rentalId,
           item_id: item.item_id,
           quantity: item.quantity,
