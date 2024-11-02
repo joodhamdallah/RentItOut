@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const PaymentController = require('../controllers/PaymentController');  
+const PaymentController = require('../controllers/PaymentController');
+
 
 router.get('/payments', PaymentController.getAllPayments);
 router.get('/payments/:id', PaymentController.getPaymentById);

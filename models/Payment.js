@@ -1,4 +1,4 @@
-const connection = require('../database'); // Import the database connection
+const connection = require('../config/database');
 
 class Payment {
   // Fetch all payment methods
