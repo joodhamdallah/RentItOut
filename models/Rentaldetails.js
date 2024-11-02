@@ -1,13 +1,13 @@
 const db = require('../config/database');
 
-class RentalDetails {
+class RentalDetailsModel {
 
   static createRentalDetails(data) {
     return new Promise((resolve, reject) => {
-      const { item_id, quantity, rental_date, return_date, subtotal } = data;
+      const {rental_id, item_id, quantity, rental_date, return_date, subtotal } = data;
       db.query(
-        'INSERT INTO Rental_details (item_id, quantity, rental_date, return_date, subtotal) VALUES (?, ?, ?, ?, ?)',
-        [item_id, quantity, rental_date, return_date, subtotal],
+        'INSERT INTO Rental_details (rental_id, item_id, quantity, rental_date, return_date, subtotal) VALUES (?, ?, ?, ?, ?, ?)',
+        [rental_id,item_id, quantity, rental_date, return_date, subtotal],
         (err, result) => {
           if (err) {
             return reject(err);
@@ -19,4 +19,4 @@ class RentalDetails {
   }
 }
 
-module.exports = RentalDetails;
+module.exports = RentalDetailsModel;
