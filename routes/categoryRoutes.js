@@ -8,6 +8,7 @@ router.get('/categories', CategoryController.listAllCategories);
 
 //  Get a specific category by ID
 router.get('/categories/:id', CategoryController.getCategoryById);
+router.get('/categories/search/:name', CategoryController.searchCategoryByName); //search by name
 
 router.put('/categories/:id', verifyToken, authorizeRole('admin'), CategoryController.updateCategory); // Update a category
 router.post('/categories', verifyToken, authorizeRole('admin'), CategoryController.addCategory);      // Add a new category

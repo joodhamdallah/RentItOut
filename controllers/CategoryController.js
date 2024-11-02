@@ -25,6 +25,42 @@ class CategoryController {
         }
     }
     
+    static async searchCategoryByName(req, res) {
+        const searchTerm = req.params.name;
+    
+        // Validate that searchTerm is provided
+        if (!searchTerm) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide a search term to search for categories.'
+            });
+        }
+    
+        try {
+            const categories = await CategoryModel.searchCategoryByName(searchTerm);
+    
+            if (categories.length === 0) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'No categories found matching your search term.'
+                });
+            }
+            res.status(200).json({
+                success: true,
+                message: 'Categories retrieved successfully.',
+                data: categories,
+            });
+        } catch (error) {
+            console.error('Error searching categories:', error);
+            res.status(500).json({
+                success: false,
+                message: 'An error occurred while searching for categories. Please try again later.',
+                error: error.message //for debugging
+            });
+        }
+    }
+    
+
     static async updateCategory(req, res) {
         const categoryId = req.params.id;
         const { category_name, category_description, number_of_items } = req.body;
