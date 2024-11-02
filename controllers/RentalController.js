@@ -144,7 +144,13 @@ class RentalController {
     if (!logistic_type) {
       return res.status(400).json({ error: 'Logistic type is required' });
     }
-  
+  // List of allowed logistic types
+  const allowedLogisticTypes = ['Delivery', 'Pickup'];
+
+  // Validate the provided logistic type
+  if (!allowedLogisticTypes.includes(logistic_type)) {
+    return res.status(400).json({ error: 'Invalid logistic type. Please choose a valid type.' });
+  }
     try {
       // Initialize the checkout details if not present
       if (!req.session.checkoutDetails) {
