@@ -103,5 +103,27 @@ exports.getItemsByUser = (req, res) => {
   });
 };
 
+// Search items by name 
+exports.searchItemsByName = (req, res) => {
+  const searchTerm = req.params.name; // Get the search term from path parameters
+
+  if (!searchTerm) {
+    return res.status(400).json({ error: 'Search term is required' });
+  }
+
+  ItemModel.searchItemsByName(searchTerm, (err, results) => {
+    if (err) {
+      console.error('Error searching for items:', err);
+      return res.status(500).json({ error: 'Failed to search for items' });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'No items found' });
+    }
+
+    res.status(200).json(results);
+  });
+};
+
 
 
