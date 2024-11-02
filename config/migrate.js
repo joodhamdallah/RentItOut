@@ -43,7 +43,7 @@ const createTables = [
     item_count INT DEFAULT 0,  -- New column for counting items
     user_id INT,
     FOREIGN KEY (category_id) REFERENCES Categories(category_id),
-    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) 
 
  );`,
 

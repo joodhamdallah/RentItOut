@@ -109,5 +109,12 @@ static deleteItem(itemId) {
       });
     });
   }
+
+  // Search for items by name (partial match)
+static searchItemsByName(searchTerm, callback) {
+  const likeTerm = `%${searchTerm}%`; // SQL LIKE wildcard
+  db.query('SELECT * FROM Items WHERE item_name LIKE ?', [likeTerm], callback);
+}
+
 }
 module.exports = ItemModel;
