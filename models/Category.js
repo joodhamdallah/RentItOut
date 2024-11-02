@@ -25,6 +25,20 @@ class CategoryModel {
         });
     }
 
+    // Search for categories by name 
+    static searchCategoryByName(searchTerm) {
+        return new Promise((resolve, reject) => {
+            const likeTerm = `%${searchTerm}%`; 
+            const query = 'SELECT * FROM Categories WHERE category_name LIKE ?';
+            connection.query(query, [likeTerm], (err, results) => {
+                if (err) {
+                    return reject(new Error('Failed to search categories: ' + err.message));
+                }
+                resolve(results); // Return the array of matching categories
+            });
+        });
+    }    
+
     static updateCategory(categoryId, data) {
         return new Promise((resolve, reject) => {
             // Create an array to hold query values
