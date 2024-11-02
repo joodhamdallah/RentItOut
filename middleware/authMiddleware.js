@@ -6,7 +6,8 @@ const sendEmail = require('../utils/sendEmail'); // Assume a function to send em
 const roleMapping = {
     admin: 1,
     vendor: 2,
-    customer: 3
+    customer: 3,
+    Insurance_Team:4
 };
 
 const verifyToken = async (req, res, next) => {
