@@ -277,25 +277,22 @@ const insertFeedbacks = () => {
   });
 };
 
-// Function to insert fake data into Payments table
+// Function to insert unique payment methods into Payments table
 const insertPayments = () => {
-  const paymentMethods = ['Credit Card', 'PayPal', 'Bank Transfer', 'Cash'];
+  const paymentMethods = ['Credit Card', 'PayPal', 'Cash'];
 
-  for (let i = 0; i < 4; i++) {
-    const fakePayment = [
-      faker.helpers.arrayElement(paymentMethods)
-    ];
-
+  paymentMethods.forEach(paymentMethod => {
     connection.query(
       'INSERT INTO Payments (payment_method) VALUES (?)',
-      fakePayment,
+      [paymentMethod],
       (err) => {
         if (err) throw err;
-        console.log(`Payment method ${fakePayment[0]} inserted`);
+        console.log(`Payment method ${paymentMethod} inserted`);
       }
     );
-  }
+  });
 };
+
 
 // Function to insert fake data into Bills table with dynamic rental_id and pay_id
 const insertBills = () => {
