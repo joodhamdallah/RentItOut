@@ -37,9 +37,7 @@ app.use('/api', itemRoutes);
 app.use('/api', userRoutes); 
 app.use('/api/rentals', rentalRoutes); 
 app.use('/api', discountsRoutes);
-
 app.use('/api', returningItemsRoutes);
-
 app.use('/api', paymentRoutes); 
 
 

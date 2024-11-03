@@ -10,7 +10,7 @@ router.get('/returning-items', verifyToken, authorizeRole('admin'), ReturningIte
 router.get('/returning-items/:id', ReturningItemsController.getReturningItemById);
 
 // Create a new returning item 
-router.post('/returning-items',verifyToken, authorizeRole('admin'), ReturningItemsController.createReturningItem);
+router.post('/returning-items',verifyToken, authorizeRole('admin','Insurance_Team'), ReturningItemsController.createReturningItem);
 
 // Update a returning item by ID
 router.put('/returning-items/:id', verifyToken, authorizeRole('admin'), ReturningItemsController.updateReturningItem);
@@ -18,8 +18,12 @@ router.put('/returning-items/:id', verifyToken, authorizeRole('admin'), Returnin
 // Delete a returning item by ID
 router.delete('/returning-items/:id', verifyToken, authorizeRole('admin'), ReturningItemsController.deleteReturningItem);
 
-//router.post('/returning-items/returned-amount/:rentalItemId', verifyToken,authorizeRole('admin','Insurance_Team')
-//,ReturningItemsController.processReturn);
+router.post('/returning-items/returned-amount/:rental_item_id/:item_id', verifyToken, authorizeRole('admin', 'Insurance_Team'), ReturningItemsController.processReturn);
+
+// router.post('/api/returning-items/returned-amount/:rental_item_id/:item_id', (req, res, next) => {
+//     console.log("Route accessed");
+//     next();
+// }, ReturningItemsController.processReturn);
 
 
-    module.exports = router;
+module.exports = router;

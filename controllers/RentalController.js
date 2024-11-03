@@ -349,11 +349,11 @@ static async getUserRentals(req, res) {
        console.log('Rental ID:', rentalId);
        console.log('Pay ID:', pay_id);
         // Create the bill entry
-        const billResponse = await BillController.createBillEntry(rentalId, totalAmount, pay_id);
-        console.log('Bill creation response:', billResponse);
-        if (!billResponse || !billResponse.bill_id) {
-            return res.status(500).json({ error: 'Failed to create bill' });
-        }
+        // const billResponse = await BillController.createBillEntry(rentalId, totalAmount, pay_id);
+        // console.log('Bill creation response:', billResponse);
+        // if (!billResponse || !billResponse.bill_id) {
+        //     return res.status(500).json({ error: 'Failed to create bill' });
+        // }
 
         req.session.cart = [];
         req.session.checkoutDetails = null;
