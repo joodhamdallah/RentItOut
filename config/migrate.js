@@ -82,11 +82,20 @@ const createTables = [
 
     `CREATE TABLE IF NOT EXISTS Bills (
         bill_id INT PRIMARY KEY AUTO_INCREMENT,
-        total_price DECIMAL(10, 2),
         rental_id INT,
         pay_id INT,
+        price_before_discount DECIMAL(10, 2), -- New column
+        discount_percentage DECIMAL(5, 2), -- New column
+        discount_description TEXT, -- New column
+        price_after_discount DECIMAL(10, 2), -- New column 
+        shipping_cost DECIMAL(10, 2), -- New column
+        bill_date DATE,
+        total_price_to_pay DECIMAL(10, 2),
+        user_id INT,
         FOREIGN KEY (rental_id) REFERENCES Rentals(rental_id) ON DELETE CASCADE,
-        FOREIGN KEY (pay_id) REFERENCES Payments(pay_id) ON DELETE CASCADE
+        FOREIGN KEY (pay_id) REFERENCES Payments(pay_id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+
     );`,
 
     `CREATE TABLE IF NOT EXISTS Feedbacks (
@@ -95,6 +104,8 @@ const createTables = [
         user_id INT,
         comment TEXT,
         rating INT,
+        item_id INT ,
+        FOREIGN KEY (item_id) REFERENCES Items(item_id) ON DELETE CASCADE,
         FOREIGN KEY (rental_id) REFERENCES Rentals(rental_id) ON DELETE CASCADE,
         FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
     );`,
