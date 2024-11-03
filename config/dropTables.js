@@ -1,4 +1,4 @@
-const connection = require('./database');  // Import your database connection
+const connection = require('./database');  
 
 const dropTables = [
 

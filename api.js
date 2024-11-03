@@ -10,6 +10,7 @@ const categoryRoutes = require('./routes/categoryRoutes');
 const itemRoutes = require('./routes/itemRoutes');
 const rentalRoutes = require('./routes/rentalsRoutes');
 const discountsRoutes = require('./routes/discountsRoutes');
+const FeedbacksRoutes = require('./routes/FeedbacksRoutes');
 
 const returningItemsRoutes = require('./routes/ReturningItemsRoutes');
 
@@ -37,9 +38,8 @@ app.use('/api', itemRoutes);
 app.use('/api', userRoutes); 
 app.use('/api/rentals', rentalRoutes); 
 app.use('/api', discountsRoutes);
-
+app.use('/api', FeedbacksRoutes);
 app.use('/api', returningItemsRoutes);
-
 app.use('/api', paymentRoutes); 
 
 

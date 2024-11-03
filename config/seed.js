@@ -348,7 +348,7 @@ const insertBills = () => {
             faker.commerce.price(20, 150, 2),
             faker.date.future(),
             randomRentalItemId,
-            randomItemId, // Add the random item_id here
+            randomItemId, 
             faker.commerce.price(5, 50, 2)  // Random overtime charge between 5 and 50 with 2 decimal places
           ];
   
