@@ -18,12 +18,11 @@ router.put('/returning-items/:id', verifyToken, authorizeRole('admin'), Returnin
 // Delete a returning item by ID
 router.delete('/returning-items/:id', verifyToken, authorizeRole('admin'), ReturningItemsController.deleteReturningItem);
 
+//returned amount proccess
 router.post('/returning-items/returned-amount/:rental_item_id/:item_id', verifyToken, authorizeRole('admin', 'Insurance_Team'), ReturningItemsController.processReturn);
 
-// router.post('/api/returning-items/returned-amount/:rental_item_id/:item_id', (req, res, next) => {
-//     console.log("Route accessed");
-//     next();
-// }, ReturningItemsController.processReturn);
+//overtime_charge proccess
+router.post('/returning-items/overtime-charge/:rental_item_id/:item_id', verifyToken, authorizeRole('admin', 'Insurance_Team'), ReturningItemsController.calculateOvertimeCharge);
 
 
 module.exports = router;
