@@ -46,6 +46,19 @@ class FeedbackController {
         }
     }
 
+
+    // Get most rented items based on feedback
+    static async getMostRentedItems(req, res) {
+        const limit = parseInt(req.query.limit) || 10; // Default to 10 if no limit is provided
+        try {
+            const items = await Feedback.getMostRentedItems(limit);
+            res.json(items);
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    }
+
+
     // Update the ]feedback
     static async updateFeedback(req, res) {
         const { feedbackId } = req.params;

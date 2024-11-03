@@ -54,6 +54,25 @@ class feedbackModeel {
         });
     }
 
+    // Get most rented items based on feedback count
+
+    static getMostRentedItems(limit = 10) {
+        return new Promise((resolve, reject) => {
+            const query = `
+                SELECT item_id, COUNT(*) AS feedback_count
+                FROM Feedbacks
+                GROUP BY item_id
+                ORDER BY feedback_count DESC
+                LIMIT ?`;
+            connection.query(query, [limit], (err, results) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve(results);
+            });
+        });
+    }
+
     // Update an existing feedback entry
     static update(feedbackId, comment, rating) {
         return new Promise((resolve, reject) => {
@@ -69,6 +88,7 @@ class feedbackModeel {
             });
         });
     }
+
 
     // Delete a feedback entry
     static delete(feedbackId) {
