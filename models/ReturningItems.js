@@ -1,5 +1,4 @@
 const db = require('../config/database');
-const mysql = require('mysql2/promise');
 
 class ReturningItemsModel {
     static getAllReturningItems() {
@@ -22,15 +21,16 @@ class ReturningItemsModel {
         });
     }
 
-    static createReturningItem({ item_name, status_for_item, returned_amount, actual_return_date, rental_item_id, overtime_charge }) {
+    static createReturningItem({ item_name, status_for_item, returned_amount, actual_return_date, rental_item_id, item_id, overtime_charge }) {
         return new Promise((resolve, reject) => {
-            const query = 'INSERT INTO Returning_Items (item_name, status_for_item, returned_amount, actual_return_date, rental_item_id, overtime_charge) VALUES (?, ?, ?, ?, ?, ?)';
-            db.query(query, [item_name, status_for_item, returned_amount, actual_return_date, rental_item_id, overtime_charge], (err, results) => {
+            const query = 'INSERT INTO Returning_Items (item_name, status_for_item, returned_amount, actual_return_date, rental_item_id, item_id, overtime_charge) VALUES (?, ?, ?, ?, ?, ?, ?)';
+            db.query(query, [item_name, status_for_item, returned_amount, actual_return_date, rental_item_id, item_id, overtime_charge], (err, results) => {
                 if (err) return reject(new Error('Failed to create returning item: ' + err.message));
                 resolve({ success: true, id: results.insertId });
             });
         });
     }
+    
 
     static updateReturningItem(RItem_id, data) {
         return new Promise((resolve, reject) => {
@@ -77,61 +77,70 @@ class ReturningItemsModel {
             });
         });
     }
-
-    static async createReturnEntry(rentalItemId, statusForItem) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                // Step 1: Get the deposit amount from the item based on rental_item_id
-                const [item] = await db.promise().query(
-                    'SELECT i.deposit FROM Items i JOIN Rental_details r ON i.item_id = r.item_id WHERE r.rental_item_id = ?',
-                    [rentalItemId]
-                );
-
-                if (!item) {
-                    return reject(new Error('Item not found'));
-                }
-
-                const deposit = item.deposit;
-                let returnedAmount;
-
-                // Step 2: Determine returned_amount based on status
-                switch (statusForItem) {
-                    case 'Excellent':
-                        returnedAmount = deposit;
-                        break;
-                    case 'Good':
-                        returnedAmount = deposit * 0.7;
-                        break;
-                    case 'Damaged':
-                        returnedAmount = deposit * 0.3;
-                        break;
-                    case 'Needs Replacement':
-                        returnedAmount = 0;
-                        break;
-                    default:
-                        return reject(new Error('Invalid status'));
-                }
-
-                // Step 3: Insert return entry into Returning_Items
-                const [result] = await db.query(
-                    `INSERT INTO Returning_Items (status_for_item, returned_amount, actual_return_date, rental_item_id, overtime_charge) 
-                     VALUES (?, ?, NOW(), ?, 0)`,
-                    [statusForItem, returnedAmount, rentalItemId]
-                );
-
-                resolve({
-                    success: true,
-                    returnId: result.insertId,
-                    returnedAmount,
-                    statusForItem
-                });
-            } catch (error) {
-                reject(error);
-            }
+    
+    static getItemDeposit(item_id) {
+        return new Promise((resolve, reject) => {
+        const query = 'SELECT deposit FROM Items WHERE item_id = ?';
+        db.query(query, [item_id], (err, results) => {
+            if (err) return reject(new Error('Failed to retrieve item deposit: ' + err.message));
+            resolve(results.length > 0 ? results[0].deposit : null);
         });
+    });
     }
+    
+    // static async createReturnEntry(rentalItemId, statusForItem) {
+    //     return new Promise(async (resolve, reject) => {
+    //         try {
+    //             // Step 1: Get the deposit amount from the item based on rental_item_id
+    //             const [item] = await db.promise().query(
+    //                 'SELECT i.deposit FROM Items i JOIN Rental_details r ON i.item_id = r.item_id WHERE r.rental_item_id = ?',
+    //                 [rentalItemId]
+    //             );
+
+    //             if (!item) {
+    //                 return reject(new Error('Item not found'));
+    //             }
+
+    //             const deposit = item.deposit;
+    //             let returnedAmount;
+
+    //             // Step 2: Determine returned_amount based on status
+    //             switch (statusForItem) {
+    //                 case 'Excellent':
+    //                     returnedAmount = deposit;
+    //                     break;
+    //                 case 'Good':
+    //                     returnedAmount = deposit * 0.7;
+    //                     break;
+    //                 case 'Damaged':
+    //                     returnedAmount = deposit * 0.3;
+    //                     break;
+    //                 case 'Needs Replacement':
+    //                     returnedAmount = 0;
+    //                     break;
+    //                 default:
+    //                     return reject(new Error('Invalid status'));
+    //             }
+
+    //             // Step 3: Insert return entry into Returning_Items
+    //             const [result] = await db.query(
+    //                 `INSERT INTO Returning_Items (status_for_item, returned_amount, actual_return_date, rental_item_id, overtime_charge) 
+    //                  VALUES (?, ?, NOW(), ?, 0)`,
+    //                 [statusForItem, returnedAmount, rentalItemId]
+    //             );
+
+    //             resolve({
+    //                 success: true,
+    //                 returnId: result.insertId,
+    //                 returnedAmount,
+    //                 statusForItem
+    //             });
+    //         } catch (error) {
+    //             reject(error);
+    //         }
+    //     });
+    // }
+
 }
-
-
 
 module.exports = ReturningItemsModel;
