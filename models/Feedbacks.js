@@ -1,33 +1,90 @@
-const connection = require('../database');
+const connection = require('../config/database');
 
-class FeedbackModel {
-    static createFeedback(rental_id, user_id, comment, rating, callback) {
-        const query = `
-            INSERT INTO Feedbacks (rental_id, user_id, comment, rating)
-            VALUES (?, ?, ?, ?)
-        `;
-        connection.query(query, [rental_id, user_id, comment, rating], callback);
+class feedbackModeel {
+    // Create a new feedback entry
+    static create(rental_id, user_id, comment, rating, item_id) {
+        return new Promise((resolve, reject) => {
+            const query = `INSERT INTO Feedbacks (rental_id, user_id, comment, rating, item_id) VALUES (?, ?, ?, ?, ?)`;
+            connection.query(query, [rental_id, user_id, comment, rating, item_id], (err, result) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve(result.insertId);
+            });
+        });
     }
 
-    static getAllFeedbacks(callback) {
-        const query = `SELECT * FROM Feedbacks`;
-        connection.query(query, callback);
+    //list all feedbacks 
+    static getAll() {
+        return new Promise((resolve, reject) => {
+            const query = `SELECT * FROM Feedbacks`;
+            connection.query(query, (err, results) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve(results);
+            });
+        });
     }
 
-    static getFeedbacksByRental(rental_id, callback) {
-        const query = `SELECT * FROM Feedbacks WHERE rental_id = ?`;
-        connection.query(query, [rental_id], callback);
+
+    // Fetch all feedbacks for a specific item
+    static getByItem(itemId) {
+        return new Promise((resolve, reject) => {
+            const query = `SELECT * FROM Feedbacks WHERE item_id = ?`;
+            connection.query(query, [itemId], (err, results) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve(results);
+            });
+        });
     }
 
-    static updateFeedback(feedback_id, comment, rating, callback) {
-        const query = `UPDATE Feedbacks SET comment = ?, rating = ? WHERE feedback_id = ?`;
-        connection.query(query, [comment, rating, feedback_id], callback);
+    // Fetch all feedbacks from a specific user
+    static getByUser(userId) {
+        return new Promise((resolve, reject) => {
+            const query = `SELECT * FROM Feedbacks WHERE user_id = ?`;
+            connection.query(query, [userId], (err, results) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve(results);
+            });
+        });
     }
 
-    static deleteFeedback(feedback_id, callback) {
-        const query = `DELETE FROM Feedbacks WHERE feedback_id = ?`;
-        connection.query(query, [feedback_id], callback);
+    // Update an existing feedback entry
+    static update(feedbackId, comment, rating) {
+        return new Promise((resolve, reject) => {
+            const query = `UPDATE Feedbacks SET comment = ?, rating = ? WHERE feedback_id = ?`;
+            connection.query(query, [comment, rating, feedbackId], (err, results) => {
+                if (err) {
+                    return reject(err);
+                }
+                if (results.affectedRows === 0) {
+                    return reject(new Error('Feedback not found'));
+                }
+                resolve(results);
+            });
+        });
+    }
+
+    // Delete a feedback entry
+    static delete(feedbackId) {
+        return new Promise((resolve, reject) => {
+            const query = `DELETE FROM Feedbacks WHERE feedback_id = ?`;
+            connection.query(query, [feedbackId], (err, results) => {
+                if (err) {
+                    return reject(err);
+                }
+                if (results.affectedRows === 0) {
+                    return reject(new Error('Feedback not found'));
+                }
+                resolve(results);
+            });
+        });
     }
 }
 
-module.exports = FeedbackModel;
+module.exports = feedbackModeel;

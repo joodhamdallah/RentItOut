@@ -1,54 +1,72 @@
-const FeedbackModel = require('../models/feedbackModel');
+const Feedback = require('../models/Feedbacks'); 
 
 class FeedbackController {
-    static createFeedback(req, res) {
-        const { rental_id, user_id, comment, rating } = req.body;
-        FeedbackModel.createFeedback(rental_id, user_id, comment, rating, (err, results) => {
-            if (err) {
-                return res.status(500).json({ error: 'Error creating feedback', details: err });
-            }
-            res.status(201).json({ message: 'Feedback created successfully', feedback_id: results.insertId });
-        });
+    // Create a new feedback
+    static async createFeedback(req, res) {
+        const userId = req.userId; 
+        const { rental_id, comment, rating, item_id } = req.body;
+        try {
+            const feedbackId = await Feedback.create(rental_id, userId, comment, rating, item_id);
+            res.status(201).json({ message: 'Feedback created successfully', feedbackId });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
     }
 
-    static getAllFeedbacks(req, res) {
-        FeedbackModel.getAllFeedbacks((err, results) => {
-            if (err) {
-                return res.status(500).json({ error: 'Error fetching feedbacks', details: err });
-            }
-            res.status(200).json(results);
-        });
+    // Get all feedbacks
+    static async getAllFeedbacks(req, res) {
+        try {
+            const feedbacks = await Feedback.getAll();
+            res.json(feedbacks);
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
     }
 
-    static getFeedbacksByRental(req, res) {
-        const { rental_id } = req.params;
-        FeedbackModel.getFeedbacksByRental(rental_id, (err, results) => {
-            if (err) {
-                return res.status(500).json({ error: 'Error fetching feedbacks', details: err });
-            }
-            res.status(200).json(results);
-        });
+
+    // Get feedbacks for a specific item
+    static async getFeedbacksByItem(req, res) {
+        const { itemId } = req.params;
+        try {
+            const feedbacks = await Feedback.getByItem(itemId);
+            res.json(feedbacks);
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
     }
 
-    static updateFeedback(req, res) {
-        const { feedback_id } = req.params;
+    // Get feedbacks from specific user
+    static async getFeedbacksByUser(req, res) {
+        const userId = req.userId; 
+        try {
+            const feedbacks = await Feedback.getByUser(userId);
+            res.json(feedbacks);
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    }
+
+    // Update the ]feedback
+    static async updateFeedback(req, res) {
+        const { feedbackId } = req.params;
         const { comment, rating } = req.body;
-        FeedbackModel.updateFeedback(feedback_id, comment, rating, (err, results) => {
-            if (err) {
-                return res.status(500).json({ error: 'Error updating feedback', details: err });
-            }
-            res.status(200).json({ message: 'Feedback updated successfully' });
-        });
+        try {
+            await Feedback.update(feedbackId, comment, rating);
+            res.json({ message: 'Feedback updated successfully' });
+        } catch (err) {
+            res.status(err.message === 'Feedback not found' ? 404 : 500).json({ error: err.message });
+        }
     }
 
-    static deleteFeedback(req, res) {
-        const { feedback_id } = req.params;
-        FeedbackModel.deleteFeedback(feedback_id, (err, results) => {
-            if (err) {
-                return res.status(500).json({ error: 'Error deleting feedback', details: err });
-            }
-            res.status(200).json({ message: 'Feedback deleted successfully' });
-        });
+    // Delete the feedback
+    static async deleteFeedback(req, res) {
+        const { feedbackId } = req.params;
+        try {
+            await Feedback.delete(feedbackId);
+            res.json({ message: 'Feedback deleted successfully' });
+        } catch (err) {
+            res.status(err.message === 'Feedback not found' ? 404 : 500).json({ error: err.message });
+        }
     }
 }
 
