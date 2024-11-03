@@ -246,36 +246,39 @@ const insertRentalDetails = () => {
 
 // Function to insert fake data into Feedbacks table with dynamic rental_id and user_id
 const insertFeedbacks = () => {
-  connection.query('SELECT rental_id FROM Rentals', (err, rentalResults) => {
-    if (err) throw err;
-    const rentalIds = rentalResults.map(rental => rental.rental_id);
-
-    connection.query('SELECT user_id FROM Users', (err, userResults) => {
+  connection.query('SELECT rental_id, user_id FROM Rentals', (err, rentalResults) => {
       if (err) throw err;
-      const userIds = userResults.map(user => user.user_id);
+      const rentalData = rentalResults.map(rental => ({ rental_id: rental.rental_id, user_id: rental.user_id }));
 
-      for (let i = 0; i < 5; i++) {
-        const randomRentalId = rentalIds[Math.floor(Math.random() * rentalIds.length)];
-        const randomUserId = userIds[Math.floor(Math.random() * userIds.length)];
-        const fakeFeedback = [
-          randomRentalId,
-          randomUserId,
-          faker.lorem.sentence(),
-          faker.number.int({ min: 1, max: 5 })
-        ];
+      connection.query('SELECT item_id FROM Items', (err, itemResults) => {
+          if (err) throw err;
+          const itemIds = itemResults.map(item => item.item_id);
 
-        connection.query(
-          'INSERT INTO Feedbacks (rental_id, user_id, comment, rating) VALUES (?, ?, ?, ?)',
-          fakeFeedback,
-          (err) => {
-            if (err) throw err;
-            console.log(`Feedback for rental_id ${randomRentalId} by user_id ${randomUserId} inserted`);
+          for (let i = 0; i < 5; i++) {
+              const randomRental = rentalData[Math.floor(Math.random() * rentalData.length)];
+              const randomItemId = itemIds[Math.floor(Math.random() * itemIds.length)];
+
+              const fakeFeedback = [
+                  randomRental.rental_id,
+                  randomRental.user_id,
+                  faker.lorem.sentence(),
+                  faker.number.int({ min: 1, max: 5 }),
+                  randomItemId
+              ];
+
+              connection.query(
+                  'INSERT INTO Feedbacks (rental_id, user_id, comment, rating, item_id) VALUES (?, ?, ?, ?, ?)',
+                  fakeFeedback,
+                  (err) => {
+                      if (err) throw err;
+                      console.log(`Feedback for rental_id ${randomRental.rental_id} by user_id ${randomRental.user_id} inserted`);
+                  }
+              );
           }
-        );
-      }
-    });
+      });
   });
 };
+
 
 // Function to insert unique payment methods into Payments table
 const insertPayments = () => {
@@ -294,37 +297,59 @@ const insertPayments = () => {
 };
 
 
-// Function to insert fake data into Bills table with dynamic rental_id and pay_id
 const insertBills = () => {
-    connection.query('SELECT rental_id FROM Rentals', (err, rentalResults) => {
+  connection.query('SELECT rental_id, user_id FROM Rentals', (err, rentalResults) => {
       if (err) throw err;
-      const rentalIds = rentalResults.map(rental => rental.rental_id);
-  
-      connection.query('SELECT Pay_id FROM Payments', (err, paymentResults) => {
-        if (err) throw err;
-        const payIds = paymentResults.map(payment => payment.Pay_id);
-  
-        for (let i = 0; i < 5; i++) {
-          const randomRentalId = rentalIds[Math.floor(Math.random() * rentalIds.length)];
-          const randomPayId = payIds[Math.floor(Math.random() * payIds.length)];
-          const fakeBill = [
-            faker.commerce.price(),
-            randomPayId,      // Assign a random pay_id
-            randomRentalId    // Assign a random rental_id
-          ];
-  
-          connection.query(
-            'INSERT INTO Bills (total_price, Pay_id, rental_id) VALUES (?, ?, ?)',
-            fakeBill,
-            (err) => {
+      const rentalData = rentalResults.map(rental => ({ rental_id: rental.rental_id, user_id: rental.user_id }));
+
+      connection.query('SELECT pay_id FROM Payments', (err, paymentResults) => {
+          if (err) throw err;
+          const payIds = paymentResults.map(payment => payment.pay_id);
+
+          connection.query('SELECT discount_percentage, description FROM Discounts', (err, discountResults) => {
               if (err) throw err;
-              console.log(`Bill for rental_id ${randomRentalId} with pay_id ${randomPayId} inserted`);
-            }
-          );
-        }
+
+              for (let i = 0; i < 5; i++) {
+                  const randomRental = rentalData[Math.floor(Math.random() * rentalData.length)];
+                  const randomPayId = payIds[Math.floor(Math.random() * payIds.length)];
+                  const randomDiscount = discountResults[Math.floor(Math.random() * discountResults.length)];
+
+                  const priceBeforeDiscount = parseFloat(faker.commerce.price(100, 500, 2));
+                  const discountPercentage = randomDiscount.discount_percentage;
+                  const discountDescription = randomDiscount.description;
+                  const priceAfterDiscount = priceBeforeDiscount * (1 - discountPercentage / 100);
+                  const shippingCost = parseFloat(faker.commerce.price(10, 50, 2));
+                  const totalPriceToPay = priceAfterDiscount + shippingCost;
+                  const billDate = faker.date.recent();
+
+                  const fakeBill = [
+                      randomRental.rental_id,
+                      randomPayId,
+                      priceBeforeDiscount,
+                      discountPercentage,
+                      discountDescription,
+                      priceAfterDiscount,
+                      shippingCost,
+                      billDate,
+                      totalPriceToPay,
+                      randomRental.user_id  // Added user_id from Rentals table
+                  ];
+
+                  connection.query(
+                      'INSERT INTO Bills (rental_id, pay_id, price_before_discount, discount_percentage, discount_description, price_after_discount, shipping_cost, bill_date, total_price_to_pay, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                      fakeBill,
+                      (err) => {
+                          if (err) throw err;
+                          console.log(`Bill for rental_id ${randomRental.rental_id} with pay_id ${randomPayId} inserted`);
+                      }
+                  );
+              }
+          });
       });
-    });
-  };
+  });
+};
+
+
   
   const insertReturningItems = () => {
     // Fetch rental_item_id and item_id
