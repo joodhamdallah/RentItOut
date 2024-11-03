@@ -89,58 +89,6 @@ class ReturningItemsModel {
     }
 
 
-    // static getRentalDetailsAndPrice(rental_item_id, item_id) {
-    //     return new Promise((resolve, reject) => {
-    //         const query = `
-    //             SELECT r.return_date, i.price_per_day 
-    //             FROM Rental_details r 
-    //             JOIN Items i ON i.item_id = ? 
-    //             WHERE r.rental_item_id = ?`;
-    //         db.query(query, [item_id, rental_item_id], (err, results) => {
-    //             if (err) return reject(new Error('Failed to retrieve rental details and price: ' + err.message));
-    //             resolve(results.length > 0 ? results[0] : null);
-    //         });
-    //     });
-    // }
-    
-    // static async getRentalDetailsAndPrice(rental_item_id, item_id) {
-    //     try {
-    //         // Get the return_date from Rental_details
-    //         const rentalQuery = 'SELECT return_date FROM Rental_details WHERE rental_item_id = ?';
-    //         const rentalResults = await new Promise((resolve, reject) => {
-    //             db.query(rentalQuery, [rental_item_id], (err, results) => {
-    //                 if (err) return reject(new Error('Failed to retrieve rental details: ' + err.message));
-    //                 resolve(results);
-    //             });
-    //         });
-    
-    //         if (rentalResults.length === 0) {
-    //             throw new Error('Rental details not found');
-    //         }
-    
-    //         const return_date = rentalResults[0].return_date;
-    
-    //         // Get the price from Items
-    //         const itemQuery = 'SELECT price_per_day FROM Items WHERE item_id = ?';
-    //         const itemResults = await new Promise((resolve, reject) => {
-    //             db.query(itemQuery, [item_id], (err, results) => {
-    //                 if (err) return reject(new Error('Failed to retrieve item price: ' + err.message));
-    //                 resolve(results);
-    //             });
-    //         });
-    
-    //         if (itemResults.length === 0) {
-    //             throw new Error('Item not found');
-    //         }
-    
-    //         const price_per_day = itemResults[0].price_per_day;
-    
-    //         return { return_date, price_per_day };
-    //     } catch (error) {
-    //         throw error;
-    //     }
-    // }
-
     static getRentalDetailsAndPrice(rental_item_id, item_id) {
         return new Promise((resolve, reject) => {
             const query = `
