@@ -87,59 +87,91 @@ class ReturningItemsModel {
         });
     });
     }
-    
-    // static async createReturnEntry(rentalItemId, statusForItem) {
-    //     return new Promise(async (resolve, reject) => {
-    //         try {
-    //             // Step 1: Get the deposit amount from the item based on rental_item_id
-    //             const [item] = await db.promise().query(
-    //                 'SELECT i.deposit FROM Items i JOIN Rental_details r ON i.item_id = r.item_id WHERE r.rental_item_id = ?',
-    //                 [rentalItemId]
-    //             );
 
-    //             if (!item) {
-    //                 return reject(new Error('Item not found'));
-    //             }
 
-    //             const deposit = item.deposit;
-    //             let returnedAmount;
-
-    //             // Step 2: Determine returned_amount based on status
-    //             switch (statusForItem) {
-    //                 case 'Excellent':
-    //                     returnedAmount = deposit;
-    //                     break;
-    //                 case 'Good':
-    //                     returnedAmount = deposit * 0.7;
-    //                     break;
-    //                 case 'Damaged':
-    //                     returnedAmount = deposit * 0.3;
-    //                     break;
-    //                 case 'Needs Replacement':
-    //                     returnedAmount = 0;
-    //                     break;
-    //                 default:
-    //                     return reject(new Error('Invalid status'));
-    //             }
-
-    //             // Step 3: Insert return entry into Returning_Items
-    //             const [result] = await db.query(
-    //                 `INSERT INTO Returning_Items (status_for_item, returned_amount, actual_return_date, rental_item_id, overtime_charge) 
-    //                  VALUES (?, ?, NOW(), ?, 0)`,
-    //                 [statusForItem, returnedAmount, rentalItemId]
-    //             );
-
-    //             resolve({
-    //                 success: true,
-    //                 returnId: result.insertId,
-    //                 returnedAmount,
-    //                 statusForItem
-    //             });
-    //         } catch (error) {
-    //             reject(error);
-    //         }
+    // static getRentalDetailsAndPrice(rental_item_id, item_id) {
+    //     return new Promise((resolve, reject) => {
+    //         const query = `
+    //             SELECT r.return_date, i.price_per_day 
+    //             FROM Rental_details r 
+    //             JOIN Items i ON i.item_id = ? 
+    //             WHERE r.rental_item_id = ?`;
+    //         db.query(query, [item_id, rental_item_id], (err, results) => {
+    //             if (err) return reject(new Error('Failed to retrieve rental details and price: ' + err.message));
+    //             resolve(results.length > 0 ? results[0] : null);
+    //         });
     //     });
     // }
+    
+    // static async getRentalDetailsAndPrice(rental_item_id, item_id) {
+    //     try {
+    //         // Get the return_date from Rental_details
+    //         const rentalQuery = 'SELECT return_date FROM Rental_details WHERE rental_item_id = ?';
+    //         const rentalResults = await new Promise((resolve, reject) => {
+    //             db.query(rentalQuery, [rental_item_id], (err, results) => {
+    //                 if (err) return reject(new Error('Failed to retrieve rental details: ' + err.message));
+    //                 resolve(results);
+    //             });
+    //         });
+    
+    //         if (rentalResults.length === 0) {
+    //             throw new Error('Rental details not found');
+    //         }
+    
+    //         const return_date = rentalResults[0].return_date;
+    
+    //         // Get the price from Items
+    //         const itemQuery = 'SELECT price_per_day FROM Items WHERE item_id = ?';
+    //         const itemResults = await new Promise((resolve, reject) => {
+    //             db.query(itemQuery, [item_id], (err, results) => {
+    //                 if (err) return reject(new Error('Failed to retrieve item price: ' + err.message));
+    //                 resolve(results);
+    //             });
+    //         });
+    
+    //         if (itemResults.length === 0) {
+    //             throw new Error('Item not found');
+    //         }
+    
+    //         const price_per_day = itemResults[0].price_per_day;
+    
+    //         return { return_date, price_per_day };
+    //     } catch (error) {
+    //         throw error;
+    //     }
+    // }
+
+    static getRentalDetailsAndPrice(rental_item_id, item_id) {
+        return new Promise((resolve, reject) => {
+            const query = `
+                SELECT r.return_date, i.price_per_day 
+                FROM Rental_details r 
+                JOIN Items i ON i.item_id = r.item_id 
+                WHERE r.rental_item_id = ? AND i.item_id = ?`;
+            db.query(query, [rental_item_id, item_id], (err, results) => {
+                if (err) return reject(new Error('Failed to retrieve rental details and price: ' + err.message));
+                if (results.length === 0) {
+                    return resolve(null); // Return null if no results found
+                }
+                resolve(results[0]); // Resolve with the first result
+            });
+        });
+    }
+    
+      
+    static updateOvertimeCharge(rental_item_id, item_id, overtime_charge) {
+        return new Promise((resolve, reject) => {
+            const query = `
+                UPDATE Returning_Items 
+                SET overtime_charge = ? 
+                WHERE rental_item_id = ? AND item_id = ?`;
+            
+            db.query(query, [overtime_charge, rental_item_id, item_id], (err, results) => {
+                if (err) return reject(new Error('Failed to update overtime charge: ' + err.message));
+                resolve(results.affectedRows > 0); // Returns true if a row was updated
+            });
+        });
+    }
 
 }
 
