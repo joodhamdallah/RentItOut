@@ -79,7 +79,6 @@ class ReturningItemsController {
                 return res.status(404).json({ success: false, message: 'Item not found' });
             }
     
-            // Determine returned amount based on status_for_item
             let returned_amount;
             switch (status_for_item) {
                 case 'Excellent':
@@ -106,7 +105,7 @@ class ReturningItemsController {
                 actual_return_date,
                 rental_item_id,
                 item_id,
-                overtime_charge:  0  // Optional: set to 0 if not provided //req.body.overtime_charge ||
+                overtime_charge:  0  
             });
     
         res.status(201).json({ 
@@ -121,40 +120,6 @@ class ReturningItemsController {
             res.status(500).json({ success: false, message: 'Failed to process returning item' });
         }
     }
-
-    // static async calculateOvertimeCharge(req, res) {
-    //     const { rental_item_id, item_id } = req.params;
-    //     const { actual_return_date } = req.body;
-    
-    //     try {
-    //         // Retrieve rental details and item price
-    //         const rentalData = await ReturningItemsModel.getRentalDetailsAndPrice(rental_item_id, item_id);
-    //         if (!rentalData) {
-    //             return res.status(404).json({ success: false, message: 'Rental details or item not found' });
-    //         }
-    
-    //         const { return_date, price_per_day } = rentalData; // Use the correct property for price
-    //         console.log(`Return Date: ${return_date}, Actual Return Date: ${actual_return_date}, Price Per Day: ${price_per_day}`);
-    
-    //         if (price_per_day === undefined) {
-    //             return res.status(404).json({ success: false, message: 'Price not found for the item' });
-    //         }
-    
-    //         const actualReturnDate = new Date(actual_return_date);
-    //         const returnDate = new Date(return_date);
-    
-    //         // Calculate the number of overtime days
-    //         const overtimeDays = Math.max(0, (actualReturnDate - returnDate) / (1000 * 60 * 60 * 24));
-    //         const overtimeCharge = overtimeDays * price_per_day; // Calculate the overtime charge
-    
-    //         console.log(`Overtime Days: ${overtimeDays}, Overtime Charge: ${overtimeCharge}`);
-    
-    //         res.status(200).json({ success: true, data: { overtime_charge: overtimeCharge, overtime_days: overtimeDays } });
-    //     } catch (error) {
-    //         console.error(error);
-    //         res.status(500).json({ success: false, message: 'Failed to calculate overtime charge' });
-    //     }
-    // }
     
     static async calculateOvertimeCharge(req, res) {
         const { rental_item_id, item_id } = req.params;
@@ -201,20 +166,7 @@ class ReturningItemsController {
             res.status(500).json({ success: false, message: 'Failed to calculate overtime charge' });
         }
     }
-    
-    static updateOvertimeCharge(rental_item_id, item_id, overtime_charge) {
-        return new Promise((resolve, reject) => {
-            const query = `
-                UPDATE Returning_Items 
-                SET overtime_charge = ? 
-                WHERE rental_item_id = ? AND item_id = ?`;
-            
-            db.query(query, [overtime_charge, rental_item_id, item_id], (err, results) => {
-                if (err) return reject(new Error('Failed to update overtime charge: ' + err.message));
-                resolve(results.affectedRows > 0); // Returns true if a row was updated
-            });
-        });
-    }
+  
     
 }
 
