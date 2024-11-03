@@ -3,9 +3,26 @@ const RentalDetails = require('../models/Rentaldetails');
 const Rentals = require('../models/Rentals');
 const Discount = require('../models/Discounts');
 const moment = require('moment'); 
+const PaymentController = require('../controllers/PaymentController');
+const BillController = require('../controllers/BillController'); 
+const sendEmail = require('../utils/sendEmail');
+
 
 class RentalController {
-      // Add item to cart
+// Get the number of rentals for a user
+static async getUserRentals(req, res) {
+  const userId = req.userId;
+
+  try {
+    const rentalCount = await Rentals.getNumberOfUserRentals(userId);
+    res.status(200).json({ userId, rentalCount });
+  } catch (err) {
+    console.error('Error retrieving rental count:', err);
+    res.status(500).json({ error: 'Failed to retrieve rental count' });
+  }
+}
+
+  // Add item to cart
   static async addToCart(req, res) {
     const { item_id, quantity, rental_date, return_date } = req.body;
 
@@ -86,7 +103,7 @@ class RentalController {
     }
   }
 
-   // Get items in the cart and display full details
+  // Get items in the cart and display full details
    static async getCart(req, res) {
     const cart = req.session.cart || [];
     const detailedCart = [];
@@ -138,6 +155,7 @@ class RentalController {
     }
   }
 
+  //Take the desired logstic type from user
   static async collectLogisticsDetails(req, res) {
     const { logistic_type } = req.body;
   
@@ -167,31 +185,61 @@ class RentalController {
     }
   }
   
-  // Collect payment details (step 2)
+  //Take the desired payment type from
   static async collectPaymentDetails(req, res) {
     const { payment_method } = req.body;
-  
+
     if (!payment_method) {
-      return res.status(400).json({ error: 'Payment method is required' });
+        return res.status(400).json({ error: 'Payment method is required' });
     }
-  
+
+    const paymentMethods = ['Credit Card', 'PayPal', 'Bank Transfer', 'Cash'];
+
+    if (!paymentMethods.includes(payment_method)) {
+        return res.status(400).json({ error: 'Invalid payment method. Please choose a valid method.' });
+    }
+
     try {
-      // Initialize the checkout details if not present
-      if (!req.session.checkoutDetails) {
-        req.session.checkoutDetails = {};
-      }
-  
-      // Store payment method in the session
-      req.session.checkoutDetails.payment_method = payment_method;
-  
-      res.status(200).json({ message: 'Payment details received. Proceed to confirmation.' });
+        // Use the controller to get the `pay_id`
+        const pay_id = await PaymentController.getPaymentByMethod(payment_method);
+
+        if (!pay_id) {
+            return res.status(404).json({ error: `Payment ID for ${payment_method} not found.` });
+        }
+
+        if (payment_method === 'Cash') {
+            // Direct confirmation for cash payments
+            req.session.checkoutDetails = { ...req.session.checkoutDetails, payment_method, pay_id };
+            return res.status(200).json({ message: 'Cash payment chosen. Proceeding directly to order confirmation.', pay_id });
+        } else {
+          req.session.checkoutDetails = {
+            ...req.session.checkoutDetails,
+            payment_method,
+            pay_id,
+        };
+          // Initiate payment for other methods
+            const paymentInitiationResponse = await PaymentController.initiatePayment(req, res);
+            if (paymentInitiationResponse.error) {
+              console.error('Error initiating payment:', paymentInitiationResponse.error);
+              if (!res.headersSent) {
+                  return res.status(500).json({ error: paymentInitiationResponse.error });
+              }         
+           }
+
+          if (!res.headersSent) {
+              return res.status(200).json(paymentInitiationResponse);
+          }
+        }
     } catch (err) {
-      console.error('Error collecting payment details:', err);
-      res.status(500).json({ error: 'Failed to process payment details' });
+          console.error('Error collecting payment details:', err);
+        if (!res.headersSent) {
+            return res.status(500).json({ error: 'Failed to process payment details' });
+        }
     }
   }
+  
 
-  // Function to determine applicable discount
+  //Determine the discount type
   static async determineDiscount(userId, rentalDetails) {
     try {
       // Get all discounts
@@ -242,133 +290,80 @@ class RentalController {
   }
 
 
-   // Confirm and store the complete rental process with discount logic
+   //Confirm and store the complete rental process with discount logic
    static async confirmCheckout(req, res) {
     const userId = req.userId;
 
     if (!req.session.cart || req.session.cart.length === 0) {
-      return res.status(400).json({ error: 'Cart is empty. Please add items to the cart before checkout' });
+        return res.status(400).json({ error: 'Cart is empty. Please add items to the cart before checkout' });
     }
 
-         const { logistic_type} = req.session.checkoutDetails || {};
-         if (!logistic_type ) {
-            return res.status(400).json({ error: 'Logistic type and required for confirmation' });
-          }
-    // const { logistic_type, payment_method } = req.session.checkoutDetails || {};
+    const { logistic_type, pay_id } = req.session.checkoutDetails || {};
 
-    // if (!logistic_type || !payment_method) {
-    //   return res.status(400).json({ error: 'Logistic type and payment method are required for confirmation' });
-    // }
+    console.log("paaaaaaaay id= "+pay_id);
+    if (!logistic_type || !pay_id) {
+        return res.status(400).json({ error: 'Logistic type and payment method are required for confirmation' });
+    }
 
     try {
-      const cartItems = req.session.cart;
+        const cartItems = req.session.cart;
+        const discountId = await RentalController.determineDiscount(userId, cartItems);
+        const rentalId = await Rentals.createRental(userId, logistic_type, discountId);
 
-      // Determine the discount ID based on rental conditions
-      const discountId = await RentalController.determineDiscount(userId, cartItems);
+        for (const item of cartItems) {
+          const itemDetails = await Item.getItemById(item.item_id);
+        
+          if (!itemDetails) {
+            console.error(`Item with ID ${item.item_id} not found.`);
+            return res.status(404).json({ error: `Item with ID ${item.item_id} not found.` });
+        }
+        // Ensure `item_count` is valid before updating
+        const newCount = itemDetails.item_count - item.quantity;
+        if (newCount < 0) {
+        console.error(`Not enough stock for item ID ${item.item_id}. Available: ${itemDetails.item_count}`);
+        return res.status(400).json({ error: `Not enough stock for item ID ${item.item_id}` });
+       }
 
-      // Save the complete rental order in the database
-      const rentalId = await Rentals.createRental(userId, logistic_type, discountId);
-      console.log("rent id="+rentalId);
+        // Update the item count in the database
+       await Item.updateItem(item.item_id, { item_count: newCount });
 
-      // Save rental details for each item
-      for (const item of cartItems) {
-        await RentalDetails.createRentalDetails({
-          rental_id: rentalId,
-          item_id: item.item_id,
-          quantity: item.quantity,
-          rental_date: item.rental_date,
-          return_date: item.return_date,
-          subtotal: item.subtotal
-        });
-      }
+            await RentalDetails.createRentalDetails({
+                rental_id: rentalId,
+                item_id: item.item_id,
+                quantity: item.quantity,
+                rental_date: item.rental_date,
+                return_date: item.return_date,
+                subtotal: item.subtotal
+            });
+            console.log("Updating item count:");
+           console.log("Current item count:", itemDetails.item_count);
+           console.log("Quantity being subtracted:", item.quantity);
 
-      // Clear cart and checkout details after checkout is confirmed
-      req.session.cart = [];
-      req.session.checkoutDetails = null;
+        }
 
-      res.status(201).json({ message: 'Checkout confirmed and stored successfully', rentalId });
+        // Save the bill
+        const totalAmount = cartItems.reduce((sum, item) => sum + item.subtotal, 0);
+       // Call the BillsController to create a bill
+       console.log('Creating bill with values:');
+       console.log('Total price:', totalAmount);
+       console.log('Rental ID:', rentalId);
+       console.log('Pay ID:', pay_id);
+        // Create the bill entry
+        const billResponse = await BillController.createBillEntry(rentalId, totalAmount, pay_id);
+        console.log('Bill creation response:', billResponse);
+        if (!billResponse || !billResponse.bill_id) {
+            return res.status(500).json({ error: 'Failed to create bill' });
+        }
+
+        req.session.cart = [];
+        req.session.checkoutDetails = null;
+
+        res.status(201).json({ message: 'Checkout confirmed and stored successfully', rentalId });
     } catch (err) {
-      console.error('Error confirming checkout:', err);
-      res.status(500).json({ error: 'Failed to confirm and store the checkout process' });
+        console.error('Error confirming checkout:', err);
+        res.status(500).json({ error: 'Failed to confirm and store the checkout process' });
     }
-  }
-}
-  
+ }
+}  
   module.exports = RentalController;
 
-// /////////saleeeeeeeeeeeeeeeeeeeh////////////
-// exports.createRentalDetails = async (req, res) => {
-//     const { item_id, quantity, rental_date, return_date } = req.body;
-
-//     // Validation to check that all the fields are required 
-//     if (!item_id || !quantity || !rental_date || !return_date) {
-//         return res.status(400).json({ error: 'All fields are required' });
-//     }
-
-//     if (quantity <= 0) {
-//         return res.status(400).json({ error: 'Quantity must be a positive number' });
-//     }
-
-//     // Validate date formats using moment.js
-//     if (!moment(rental_date, 'YYYY-MM-DD', true).isValid() || !moment(return_date, 'YYYY-MM-DD', true).isValid()) {
-//         return res.status(400).json({ error: 'Dates must be in the format YYYY-MM-DD' });
-//     }
-
-//     // Make sure that the return date is after the rental date
-//     if (moment(return_date).isBefore(moment(rental_date))) {
-//         return res.status(400).json({ error: 'Return date must be after the rental date' });
-//     }
-
-//     try {
-//         const item = await Item.getItemById(item_id);
-
-//         // Check if item was found
-//         if (!item) {
-//             console.log('Item not found for ID:', item_id);
-//             return res.status(404).json({ error: 'Item not found' });
-//         }
-
-//         // Check if enough items are available
-//         if (item.item_count < quantity) {
-//             return res.status(400).json({ error: 'Not enough items available for rental' });
-//         }
-
-//         const pricePerDay = parseFloat(item.price_per_day); 
-//         const deposit = parseFloat(item.deposit); 
-
-//         // Calculate the number of rental days (including the start day)
-//         const rentalDays = moment(return_date).diff(moment(rental_date), 'days') + 1;
-
-//         // Calculate subtotal
-//         const subtotal = (pricePerDay * rentalDays * quantity) + deposit;
-
-//         // Check if subtotal is a valid number
-//         if (isNaN(subtotal)) {
-//             console.error("Calculated subtotal is NaN");
-//             return res.status(500).json({ error: 'Failed to calculate subtotal' });
-//         }
-
-//         console.log("Subtotal:", subtotal); 
-
-//         // Create rental details
-//         const result = await RentalDetails.createRentalDetails({
-//             item_id,
-//             quantity,
-//             rental_date,
-//             return_date,
-//             subtotal,
-//         });
-
-//         // Decrement item_count after successful rental creation
-//         await Item.updateItem(item_id, { item_count: item.item_count - quantity }); // Update item_count
-
-//         res.status(201).json({
-//             message: 'Rental details created successfully', 
-//             rental_item_id: result.insertId,
-//             subtotal, 
-//         });
-//     } catch (err) {
-//         console.error('Error creating rental details:', err);
-//         res.status(500).json({ error: 'Failed to create rental details' });
-//     }
-// };
