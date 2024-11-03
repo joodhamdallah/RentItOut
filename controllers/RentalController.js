@@ -5,9 +5,23 @@ const Discount = require('../models/Discounts');
 const moment = require('moment'); 
 const PaymentController = require('../controllers/PaymentController');
 const BillController = require('../controllers/BillController'); 
+const sendEmail = require('../utils/sendEmail');
 
 
 class RentalController {
+// Get the number of rentals for a user
+static async getUserRentals(req, res) {
+  const userId = req.userId;
+
+  try {
+    const rentalCount = await Rentals.getNumberOfUserRentals(userId);
+    res.status(200).json({ userId, rentalCount });
+  } catch (err) {
+    console.error('Error retrieving rental count:', err);
+    res.status(500).json({ error: 'Failed to retrieve rental count' });
+  }
+}
+
   // Add item to cart
   static async addToCart(req, res) {
     const { item_id, quantity, rental_date, return_date } = req.body;
