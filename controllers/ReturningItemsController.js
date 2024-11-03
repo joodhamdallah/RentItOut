@@ -26,9 +26,9 @@ class ReturningItemsController {
     }
     
     static async createReturningItem(req, res) {
-        const { item_name, status_for_item, returned_amount, actual_return_date, rental_item_id, overtime_charge } = req.body;
+        const { item_name, status_for_item, returned_amount, actual_return_date, rental_item_id,item_id, overtime_charge } = req.body;
         try {
-            const newItem = await ReturningItemsModel.createReturningItem({ item_name, status_for_item, returned_amount, actual_return_date, rental_item_id, overtime_charge });
+            const newItem = await ReturningItemsModel.createReturningItem({ item_name, status_for_item, returned_amount, actual_return_date, rental_item_id,item_id, overtime_charge });
             res.status(201).json({ success: true, data: newItem });
         } catch (error) {
             console.error(error);
@@ -79,7 +79,6 @@ class ReturningItemsController {
                 return res.status(404).json({ success: false, message: 'Item not found' });
             }
     
-            // Determine returned amount based on status_for_item
             let returned_amount;
             switch (status_for_item) {
                 case 'Excellent':
@@ -100,21 +99,75 @@ class ReturningItemsController {
     
             // Insert the returning item record
             const newItem = await ReturningItemsModel.createReturningItem({
-                item_name: req.body.item_name,  // Assuming item_name is also passed in the body
+                item_name: req.body.item_name,  
                 status_for_item,
                 returned_amount,
                 actual_return_date,
                 rental_item_id,
                 item_id,
-                overtime_charge: req.body.overtime_charge || 0  // Optional: set to 0 if not provided
+                overtime_charge:  0  
             });
     
-            res.status(201).json({ success: true, data: newItem });
+        res.status(201).json({ 
+            success: true, 
+            data: newItem, 
+            deposit: deposit, 
+            returned_amount: returned_amount 
+        });
+
         } catch (error) {
             console.error(error);
             res.status(500).json({ success: false, message: 'Failed to process returning item' });
         }
     }
+    
+    static async calculateOvertimeCharge(req, res) {
+        const { rental_item_id, item_id } = req.params;
+        const { actual_return_date } = req.body;
+    
+        try {
+            const rentalData = await ReturningItemsModel.getRentalDetailsAndPrice(rental_item_id, item_id);
+            console.log("Rental Data:", rentalData); // Log rental data
+            
+            if (!rentalData) {
+                return res.status(404).json({ success: false, message: 'Rental details or item not found' });
+            }
+    
+            const { return_date, price_per_day } = rentalData;
+    
+            const actualReturnDate = new Date(actual_return_date);
+            const returnDate = new Date(return_date);
+            const overtimeDays = Math.max(0, (actualReturnDate - returnDate) / (1000 * 60 * 60 * 24));
+            const overtimeCharge = overtimeDays * price_per_day;
+    
+            const updateData = {
+                actual_return_date,
+                overtime_charge: overtimeCharge
+            };
+    
+            console.log("Update Data:", updateData); // Log update data
+    
+            const updateResult = await ReturningItemsModel.updateOvertimeCharge(rental_item_id, item_id, overtimeCharge);
+            console.log("Update Result:", updateResult); // Log update result
+    
+            if (!updateResult) {
+                return res.status(404).json({ success: false, message: 'Failed to update the returning item' });
+            }
+    
+            res.status(200).json({ 
+                success: true, 
+                data: { 
+                    overtime_charge: overtimeCharge, 
+                    overtime_days: overtimeDays 
+                } 
+            });
+        } catch (error) {
+            console.error("Error:", error); // Log the error
+            res.status(500).json({ success: false, message: 'Failed to calculate overtime charge' });
+        }
+    }
+  
+    
 }
 
 module.exports = ReturningItemsController;
