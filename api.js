@@ -10,10 +10,11 @@ const categoryRoutes = require('./routes/categoryRoutes');
 const itemRoutes = require('./routes/itemRoutes');
 const rentalRoutes = require('./routes/rentalsRoutes');
 const discountsRoutes = require('./routes/discountsRoutes');
-
 const returningItemsRoutes = require('./routes/ReturningItemsRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
+const feedbackRoutes = require('./routes/feedbackRoutes')
 
-const paymentRoutes = require('./routes/paymentRoutes');  
+
 
 app.use(express.json());
 app.use(cookieParser());
@@ -39,6 +40,8 @@ app.use('/api/rentals', rentalRoutes);
 app.use('/api', discountsRoutes);
 app.use('/api', returningItemsRoutes);
 app.use('/api', paymentRoutes); 
+app.use('/api', feedbackRoutes); 
+
 
 
 const PORT = 3000;
