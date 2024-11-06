@@ -246,7 +246,7 @@ class RentalController {
       let applicableDiscount = null;
 
       // Check if this is the user's first rental
-      const userRentals = await Rentals.getNumberOfUserRentals(userId);
+      const userRentals =  await RentalController.getNumberOfUserRentals(userId);
       if (userRentals.length === 0) {
         applicableDiscount = discounts.find(discount => discount.discount_name === 'First Purchase Discount');
       }
@@ -379,15 +379,13 @@ class RentalController {
 
 // Get the number of rentals for a user
 //it doesnt have a specific route, only used to determine discount percentage
-static async getNumberOfUserRentals(req, res) {
-  const userId = req.userId;
-
+static async getNumberOfUserRentals(userId) {
   try {
-    const rentalCount = await Rentals.getNumberOfUserRentals(userId);
-    res.status(200).json({ userId, rentalCount });
-  } catch (err) {
+    const rentalCount = await Rentals.getUserRentals(userId);
+    return rentalCount;
+    } catch (err) {
     console.error('Error retrieving rental count:', err);
-    res.status(500).json({ error: 'Failed to retrieve rental count' });
+    throw new Error('Failed to retrieve rental count');
   }
 }
 
