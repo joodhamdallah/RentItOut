@@ -1,11 +1,19 @@
 const Feedback = require('../models/Feedbacks'); 
+const RentalDetails = require('../models/Rentaldetails');
+
 
 class FeedbackController {
     // Create a new feedback
     static async createFeedback(req, res) {
-        const userId = req.userId; 
+        const userId = req.userId;
         const { rental_id, comment, rating, item_id } = req.body;
+
         try {
+            const rentalDetails = await RentalDetails.findByRentalAndItem(userId, rental_id, item_id);
+            if (!rentalDetails) {
+                return res.status(400).json({ error: 'The specified item is not associated with this rental for the user.' });
+            }
+
             const feedbackId = await Feedback.create(rental_id, userId, comment, rating, item_id);
             res.status(201).json({ message: 'Feedback created successfully', feedbackId });
         } catch (err) {
