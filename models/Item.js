@@ -2,8 +2,15 @@ const db = require('../config/database');
 
 class ItemModel {
   // Retrieve all items
-  static getAllItems(callback) {
-    db.query('SELECT * FROM Items', callback);
+  static getAllItems() {
+    return new Promise((resolve, reject) => {
+      db.query('SELECT * FROM Items', (err, results) => {
+        if (err) {
+          return reject(err); // Handle the error case
+        }
+        resolve(results); // Return the results
+      });
+    });
   }
 
   // Retrieve a single item by ID
@@ -95,8 +102,15 @@ static deleteItem(itemId) {
   });
 }
   // Retrieve items by user_id
-  static getItemsByUser(userId, callback) {
-    db.query('SELECT * FROM Items WHERE user_id = ?', [userId], callback);
+  static getItemsByUser(userId) {
+    return new Promise((resolve, reject) => {
+      db.query('SELECT * FROM Items WHERE user_id = ?', [userId], (err, results) => {
+        if (err) {
+          return reject(err); 
+        }
+        resolve(results); 
+      });
+    });
   }
 
   static nullifyUserIdInItems(userId) {
@@ -111,10 +125,17 @@ static deleteItem(itemId) {
   }
 
   // Search for items by name (partial match)
-static searchItemsByName(searchTerm, callback) {
-  const likeTerm = `%${searchTerm}%`; // SQL LIKE wildcard
-  db.query('SELECT * FROM Items WHERE item_name LIKE ?', [likeTerm], callback);
-}
+  static searchItemsByName(searchTerm) {
+    return new Promise((resolve, reject) => {
+      const likeTerm = `%${searchTerm}%`; // SQL LIKE wildcard
+      db.query('SELECT * FROM Items WHERE item_name LIKE ?', [likeTerm], (err, results) => {
+        if (err) {
+          return reject(err); // Handle query error
+        }
+        resolve(results); // Resolve with results
+      });
+    });
+  }
 
 }
 module.exports = ItemModel;

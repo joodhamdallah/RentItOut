@@ -1,27 +1,22 @@
-const ItemModel = require('../models/Item'); 
-const CategoryModel = require('../models/Category'); 
+const ItemService = require('../services/Items/ItemService');
 
-// List all items
-exports.listItems = (req, res) => {
-  ItemModel.getAllItems((err, results) => {
-    if (err) {
-      return res.status(500).json({ error: 'Failed to retrieve items' });
-    }
-    res.status(200).json(results);
-  });
+
+exports.listItems = async (req, res) => {
+  try {
+    const items = await ItemService.getAllItems();
+    res.status(200).json(items);
+  } catch (err) {
+    console.error('Error retrieving items:', err);
+    res.status(500).json({ error: 'Failed to retrieve items' });
+  }
 };
 
-// Get item by ID
 exports.getItemById = async (req, res) => {
-  const itemId = req.params.id; // Get the item ID from the request parameters
-
   try {
-    const item = await ItemModel.getItemById(itemId);
-
+    const item = await ItemService.getItemById(req.params.id);
     if (!item) {
       return res.status(404).json({ error: 'Item not found' });
     }
-
     res.status(200).json({ item });
   } catch (err) {
     console.error('Error retrieving item:', err);
@@ -29,101 +24,63 @@ exports.getItemById = async (req, res) => {
   }
 };
 
-
-// Create a new item
 exports.createItem = async (req, res) => {
-  const itemData = req.body;
-  const { category_id } = itemData; // take cat_id from the request body
-  itemData.user_id = req.userId; // Add user_id from the verified token to item data
-
   try {
-    //Create the new item
-    const result = await ItemModel.createItem(itemData);
-
-    //Increment the number of items for the given cat_id
-    const success = await CategoryModel.incrementNumberOfItems(category_id); 
-
-    if (!success) {
-      return res.status(404).json({ error: 'Category not found or number of items could not be updated' });
-    }
+    const itemData = { ...req.body, user_id: req.userId };
+    const result = await ItemService.createItem(itemData);
     res.status(201).json({ message: 'Item created successfully', item_id: result.insertId });
   } catch (err) {
-    console.error("Error creating item:", err);
+    console.error('Error creating item:', err);
     res.status(500).json({ error: 'Failed to create item' });
   }
 };
 
-// Update item details
-exports.updateItem = async(req, res) => {
-  const id = req.params.id;
-  const itemData = req.body; // Only include fields that need to be updated
-
-    // Check if the provided category_id is valid
-    if (itemData.category_id) {
-      const categoryExists = await CategoryModel.getCategoryById(itemData.category_id);
-      if (!categoryExists) {
-        return res.status(404).json({ error: `Category with ID ${itemData.category_id} not found` });
-      }
-    }
-
-  ItemModel.updateItem(id, itemData, (err, result) => {
-    if (err) {
-      return res.status(500).json({ error: 'Failed to update item' });
-    }
+exports.updateItem = async (req, res) => {
+  try {
+    await ItemService.updateItem(req.params.id, req.body);
     res.status(200).json({ message: 'Item updated successfully' });
-  });
+  } catch (err) {
+    console.error('Error updating item:', err);
+    res.status(500).json({ error: 'Failed to update item' });
+  }
 };
 
-
-// Delete an item
 exports.deleteItem = async (req, res) => {
-  const itemId = req.params.id;
-
   try {
-    const success = await ItemModel.deleteItem(itemId);
+    const success = await ItemService.deleteItem(req.params.id);
     if (!success) {
       return res.status(404).json({ success: false, message: 'Item not found' });
     }
     res.status(200).json({ success: true, message: 'Item deleted successfully' });
-  } catch (error) {
-    console.error("Error deleting item:", error);
-    res.status(500).json({ success: false, message: 'Failed to delete item', error });
+  } catch (err) {
+    console.error('Error deleting item:', err);
+    res.status(500).json({ success: false, message: 'Failed to delete item' });
   }
 };
 
-// Get items by user ID
-exports.getItemsByUser = (req, res) => {
-  const userId = req.userId;  // Retrieve userId from the verified token
-
-  ItemModel.getItemsByUser(userId, (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: 'Failed to retrieve items for the user' });
+exports.getItemsByUser = async (req, res) => {
+  try {
+    const items = await ItemService.getItemsByUser(req.userId);
+    if (items.length === 0) {
+      return res.status(404).json({ message: 'No items found for this user' });
     }
-    res.status(200).json(results);
-  });
+    res.status(200).json(items);  
+  } catch (err) {
+    console.error('Error retrieving items for user:', err);
+    res.status(500).json({ error: 'Failed to retrieve items for the user' });
+  }
 };
 
-// Search items by name 
-exports.searchItemsByName = (req, res) => {
-  const searchTerm = req.params.name; // Get the search term from path parameters
 
-  if (!searchTerm) {
-    return res.status(400).json({ error: 'Search term is required' });
-  }
-
-  ItemModel.searchItemsByName(searchTerm, (err, results) => {
-    if (err) {
-      console.error('Error searching for items:', err);
-      return res.status(500).json({ error: 'Failed to search for items' });
-    }
-
-    if (results.length === 0) {
+exports.searchItemsByName = async (req, res) => {
+  try {
+    const items = await ItemService.searchItemsByName(req.params.name);
+    if (items.length === 0) {
       return res.status(404).json({ message: 'No items found' });
     }
-
-    res.status(200).json(results);
-  });
+    res.status(200).json(items);
+  } catch (err) {
+    console.error('Error searching items:', err);
+    res.status(500).json({ error: 'Failed to search for items' });
+  }
 };
-
-
-
