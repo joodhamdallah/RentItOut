@@ -167,6 +167,20 @@ class UserModel {
             });
         });
     }
+
+    static async getUserById(userId) {
+        return new Promise((resolve, reject) => {
+            connection.query('SELECT * FROM Users WHERE user_id = ?', [userId], (error, results) => {
+                if (error) {
+                    return reject(error);
+                }
+                if (results.length === 0) {
+                    return resolve(null); // Or reject with a specific error if preferred
+                }
+                resolve(results[0]);
+            });
+        });
+    }
 }
 
 

@@ -39,7 +39,7 @@ const verifyToken = async (req, res, next) => {
         req.userId = currentUser.user_id;
         req.userRole = currentUser.role_id;
         req.user = currentUser;
-        console.log('Decoded user role from token:', req.userRole);
+       // console.log('Decoded user role from token:', req.userRole);
     
         next(); // Pass to the next middleware
 

@@ -102,7 +102,7 @@ class PaymentController {
  // Method to initiate a Stripe payment
  static async initiatePayment(req, res) {
   const { payment_method } = req.body;
-  const amount = req.session.cart.reduce((sum, item) => sum + item.subtotal, 0) * 100; // Amount in cents
+  const amount = Math.round(req.session.cart.reduce((sum, item) => sum + item.subtotal, 0) * 100); // Amount in cents
 
   try {
     if (payment_method === 'PayPal'||payment_method === 'Credit Card') {
