@@ -246,7 +246,7 @@ class RentalController {
       let applicableDiscount = null;
 
       // Check if this is the user's first rental
-      const userRentals = await Rentals.getUserRentals(userId);
+      const userRentals = await Rentals.getNumberOfUserRentals(userId);
       if (userRentals.length === 0) {
         applicableDiscount = discounts.find(discount => discount.discount_name === 'First Purchase Discount');
       }
@@ -365,6 +365,7 @@ class RentalController {
     }
  }
 
+ //not useeeed
  static async getAllRentals(req, res) {
   try {
     const rentals = await Rentals.getAllRentals();
@@ -377,7 +378,8 @@ class RentalController {
 
 
 // Get the number of rentals for a user
-static async getUserRentals(req, res) {
+//it doesnt have a specific route, only used to determine discount percentage
+static async getNumberOfUserRentals(req, res) {
   const userId = req.userId;
 
   try {
@@ -458,7 +460,7 @@ static async getUserRentals(req, res) {
     }
 }
 
-//get rentals for a user
+//get rentals for a user who's logged in
 static async getUserRentalsWithDetails(req, res) {
   // Extract userId from the cookie
   const userId = req.userId;

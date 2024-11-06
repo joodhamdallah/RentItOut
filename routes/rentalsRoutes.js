@@ -18,18 +18,16 @@ router.post('/checkout/payment', verifyToken, RentalController.collectPaymentDet
 // Confirm checkout (step 3)
 router.post('/checkout/confirm', verifyToken, RentalController.confirmCheckout);
 
-//General info about renatls
-//router.get('/',verifyToken,authorizeRole('admin'), RentalController.getAllRentals);
+//rentals with basic info
+router.get('/basics', verifyToken,authorizeRole('admin'),RentalController.getAllRentalsWithInfo);
 
-//rentals with more information
-router.get('/details', verifyToken,authorizeRole('admin'),RentalController.getAllRentalsWithInfo);
-
-//get renta with it's details using a rental id
+//get rental with it's details using a rental id
 router.get('/details/:rentalId', verifyToken, authorizeRole('admin'), RentalController.getRentalDetailsByRentalId);
 
 //delete rental and associated rental details
 router.delete('/:rentalId', verifyToken, authorizeRole('admin'), RentalController.deleteRental);
 
+//get the rentals with the user who is logged in 
 router.get('/', verifyToken, RentalController.getUserRentalsWithDetails);
 
 
