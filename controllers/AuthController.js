@@ -1,5 +1,5 @@
 const UserModel = require('../models/User');
-const { generateJWT } = require('../services/tokenService');
+const { generateJWT } = require('../services/Users/tokenService');
 const { validateEmail, validatePassword } = require('../utils/validators');
 const crypto = require('crypto');
 const sendEmail=require('../utils/sendEmail');

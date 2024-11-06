@@ -1,14 +1,14 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
-const sendEmail = require('../utils/sendEmail');
+const sendEmail = require('../../utils/sendEmail');
 
 async function generateInvoicePDF(user, rentalId, logistic_type, bill, cartItems, discountDetails, payment_method) {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
 
     // Logo setup
-    const logoPath = path.resolve(__dirname, '../images/logo.png');
+    const logoPath = path.resolve(__dirname, '../../images/logo.png');
     const logoBase64 = fs.readFileSync(logoPath, { encoding: 'base64' });
     const logoDataUri = `data:image/png;base64,${logoBase64}`;
 
