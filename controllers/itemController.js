@@ -61,12 +61,16 @@ exports.deleteItem = async (req, res) => {
 exports.getItemsByUser = async (req, res) => {
   try {
     const items = await ItemService.getItemsByUser(req.userId);
-    res.status(200).json(items);
+    if (items.length === 0) {
+      return res.status(404).json({ message: 'No items found for this user' });
+    }
+    res.status(200).json(items);  
   } catch (err) {
     console.error('Error retrieving items for user:', err);
     res.status(500).json({ error: 'Failed to retrieve items for the user' });
   }
 };
+
 
 exports.searchItemsByName = async (req, res) => {
   try {

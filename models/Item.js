@@ -102,8 +102,15 @@ static deleteItem(itemId) {
   });
 }
   // Retrieve items by user_id
-  static getItemsByUser(userId, callback) {
-    db.query('SELECT * FROM Items WHERE user_id = ?', [userId], callback);
+  static getItemsByUser(userId) {
+    return new Promise((resolve, reject) => {
+      db.query('SELECT * FROM Items WHERE user_id = ?', [userId], (err, results) => {
+        if (err) {
+          return reject(err); 
+        }
+        resolve(results); 
+      });
+    });
   }
 
   static nullifyUserIdInItems(userId) {
