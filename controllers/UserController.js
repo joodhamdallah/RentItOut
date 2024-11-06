@@ -13,18 +13,16 @@ class UserController {
     }
 
     // Retrieve user by ID
-    static async getUserById(req, res) {
-        try {
-            const { id } = req.params;
-            const user = await UserModel.findUserById(id);
-            if (!user) {
-                return res.status(404).json({ message: 'User not found' });
-            }
-            res.status(200).json(user);
-        } catch (error) {
-            res.status(500).json({ message: 'Error retrieving user by ID', error });
-        }
-    }
+    
+   static async getUserById(userId) {
+      try {
+        const user = await UserModel.findUserById(userId);
+        return user || null;  // Return the user or null if not found
+       } catch (error) {
+        console.error('Error retrieving user by ID:', error);
+        return null; // Return null on error to allow error handling in caller function
+       }
+   }
 
     // Retrieve user by email
     static async getUserByEmail(req, res) {

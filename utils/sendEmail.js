@@ -16,8 +16,9 @@ const sendEmail = async (options) => {
     to: options.email,                  // Recipient email address
     subject: options.subject,           // Subject line
     text: options.message,              // Plain text message
-    // html: options.html,              // Optional: uncomment if sending an HTML-formatted email
-  };
+     html: options.html,              // Optional: uncomment if sending an HTML-formatted email
+     attachments: options.attachments || [] // Attachments (like inline images)
+    };
 
   // 3. Send the email
   await transporter.sendMail(mailOptions);
