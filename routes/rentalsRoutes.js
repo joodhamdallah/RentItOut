@@ -18,6 +18,11 @@ router.post('/checkout/payment', verifyToken, RentalController.collectPaymentDet
 // Confirm checkout (step 3)
 router.post('/checkout/confirm', verifyToken, RentalController.confirmCheckout);
 
+//get the rentals with the user who is logged in 
+router.get('/', verifyToken, RentalController.getUserRentalsWithDetails);
+
+
+//Admin routes:
 //rentals with basic info
 router.get('/basics', verifyToken,authorizeRole('admin'),RentalController.getAllRentalsWithInfo);
 
@@ -26,10 +31,6 @@ router.get('/details/:rentalId', verifyToken, authorizeRole('admin'), RentalCont
 
 //delete rental and associated rental details
 router.delete('/:rentalId', verifyToken, authorizeRole('admin'), RentalController.deleteRental);
-
-//get the rentals with the user who is logged in 
-router.get('/', verifyToken, RentalController.getUserRentalsWithDetails);
-
 
 
 module.exports = router;
