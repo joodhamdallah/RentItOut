@@ -119,3 +119,22 @@
    ```bash
     node dropTables.js 
    ```
+5. Set up .env:
+  - DB_HOST=localhost         
+  - DB_USER=root               
+  - DB_PASSWORD=      
+  - DB_NAME=project       
+  - DB_PORT=3306
+  - NODE_ENV=development
+  - JWT_SECRET=RentItOut-SaLeJo/26/12
+  - JWT_EXPIRES_IN=10m
+  - EMAIL_USERNAME="gameboxjsd2023@gmail.com"
+  - EMAIL_PASSWORD="pidj svlq nxel nohb"
+  - EMAIL_FROM="RentItOut Support <your-email@gmail.com>"
+  - SESSION_SECRET=JoodSession_22Secret
+  - STRIPE_SECRET_KEY=sk_test_51QGpOFABTVjEZPaZZBDa2IsQiGjlDbL8A25jtbfPhJXLPG5b6JcVM3kNmH94ZVM8nkSSkS4qd5t4kYyiQZE51ksg00xl2QmUDR
+  - STRIPE_PUBLISHABLE_KEY=pk_test_51QGpOFABTVjEZPaZvXOk2ZsqahVO3Vomjp61el04KKwxb7zLd63VizWUEC1D9O6voDLdcP1mC9whINdgFdyl549000anSuQV3y
+  - PAYPAL_CLIENT_ID=your_paypal_client_id
+  - PAYPAL_SECRET=your_paypal_secret
+
+#JWT_COOKIE_EXPIRES_IN_DAYS=90
