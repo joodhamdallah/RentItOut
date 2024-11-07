@@ -62,5 +62,27 @@ class RentalDetailsModel {
             });
         });
     }
+    static async getRentalsDueOn(date) {
+      return new Promise((resolve, reject) => {
+          const query = `
+              SELECT rd.rental_id, rd.item_id, rd.return_date, u.email AS user_email, 
+                     CONCAT(u.first_name, ' ', u.last_name) AS user_name, 
+                     i.item_name, i.price_per_day
+              FROM Rental_details rd
+              JOIN Rentals r ON rd.rental_id = r.rental_id
+              JOIN Users u ON r.user_id = u.user_id
+              JOIN Items i ON rd.item_id = i.item_id
+              WHERE rd.return_date = ?
+          `;
+          db.query(query, [date], (err, results) => {
+              if (err) {
+                  return reject(new Error('Failed to retrieve rentals due tomorrow: ' + err.message));
+              }
+              resolve(results);
+          });
+      });
+  }
+  
+
 }
 module.exports = RentalDetailsModel;

@@ -9,7 +9,7 @@ router.patch('/users/updateProfile', verifyToken, UserController.updateUser);
 
 // Admin-only routes for managing users
 router.get('/users', verifyToken, authorizeRole('admin'), UserController.getAllUsers);
-router.get('/users/:id', verifyToken, authorizeRole('admin'), UserController.getUserById);
+router.get('/users/:id', verifyToken, authorizeRole('admin'), UserController.getUser);
 router.get('/users/email/:email', verifyToken, authorizeRole('admin'), UserController.getUserByEmail);
 router.get('/users/phone/:phoneNumber', verifyToken, authorizeRole('admin'), UserController.getUserByPhoneNumber); 
 

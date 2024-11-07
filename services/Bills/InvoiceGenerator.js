@@ -68,6 +68,7 @@ async function generateInvoicePDF(user, rentalId, logistic_type, bill, cartItems
                 </table>
 
                 <h3>Billing Information</h3>
+                <p><strong>Bill id:</strong> ${bill.bill_id}</p>
                 <p><strong>Price Before Discount:</strong> $${bill.price_before_discount}</p>
                 ${discountInfo}
                 <p><strong>Price After Discount:</strong> $${bill.price_after_discount}</p>
@@ -99,7 +100,7 @@ async function sendInvoiceEmail(user, rentalId, logistic_type, bill, cartItems, 
         message: `Please find your invoice attached for Rental ID ${rentalId}.`,
         attachments: [
             {
-                filename: `invoice-${rentalId}.pdf`,
+                filename: `invoice-${bill.bill_id}.pdf`,
                 content: pdfBuffer,
                 contentType: 'application/pdf',
             },
