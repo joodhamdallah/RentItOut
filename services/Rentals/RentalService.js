@@ -109,6 +109,49 @@ class RentalService {
             throw new Error('Failed to delete rental');
         }
     }
+
+     // Cancel a rental
+    static async cancelRental(rentalId, userId) {
+    const rental = await Rentals.getRentalById(rentalId);
+    if (!rental || rental.user_id !== userId) {
+        return { success: false, message: 'Rental not found or unauthorized' };
+    }
+    if (moment().isAfter(moment(rental.rental_date), 'day')) {
+        return { success: false, message: 'Cancellation is not allowed after the rental date has started' };
+    }
+
+    try {
+        await Rentals.deleteRentalById(rentalId); // Deleting the rental and associated records
+        return { success: true, message: 'Rental cancelled successfully' };
+    } catch (error) {
+        throw new Error('Failed to cancel rental: ' + error.message);
+    }
+}
+
+     // Extend a rental period
+     static async extendRentalPeriod(rentalId, newReturnDate) {
+    const rentalDetails = await Rentals.getRentalById(rentalId);
+
+    if (!rentalDetails) {
+        return { success: false, message: 'Rental not found' };
+    }
+
+    if (moment(newReturnDate).isBefore(rentalDetails.return_date)) {
+        return { success: false, message: 'New return date must be after the current return date' };
+    }
+
+    const additionalDays = moment(newReturnDate).diff(moment(rentalDetails.return_date), 'days');
+    const additionalCost = rentalDetails.price_per_day * additionalDays * rentalDetails.quantity;
+
+    try {
+        await Rentals.updateReturnDate(rentalId, newReturnDate);
+        await Rentals.updateTotalCost(rentalId, rentalDetails.total_cost + additionalCost);
+        return { success: true, message: 'Rental period extended successfully', additionalCost };
+    } catch (error) {
+        throw new Error('Failed to extend rental period: ' + error.message);
+    }
+}
+     
 }
 
 module.exports = RentalService;

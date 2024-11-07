@@ -27,6 +27,43 @@ class RentalController {
             res.status(500).json({ error: 'Failed to add item to cart' });
         }
     }
+     // Update an item in the cart
+     static async updateCartItem(req, res) {
+      const { itemId } = req.params;
+      const { quantity, rental_date, return_date } = req.body;
+
+      try {
+          req.session.cart = req.session.cart || [];
+          const result = await CartService.updateCartItem(itemId, quantity, rental_date, return_date, req.session.cart);
+
+          if (!result.success) {
+              return res.status(400).json({ error: result.message });
+          }
+
+          res.status(200).json({ message: result.message });
+      } catch (error) {
+          console.error('Error updating cart item:', error);
+          res.status(500).json({ error: 'Failed to update cart item' });
+      }
+  }
+  // Remove an item from the cart
+  static async removeCartItem(req, res) {
+      const { itemId } = req.params;
+
+      try {
+          req.session.cart = req.session.cart || [];
+          const result = await CartService.removeCartItem(itemId, req.session.cart);
+
+          if (!result.success) {
+              return res.status(400).json({ error: result.message });
+          }
+
+          res.status(200).json({ message: result.message });
+      } catch (error) {
+          console.error('Error removing item from cart:', error);
+          res.status(500).json({ error: 'Failed to remove item from cart' });
+      }
+  }
 
     static async getCart(req, res) {
         try {
@@ -157,6 +194,39 @@ class RentalController {
       }
   }
   
+  // Cancel a rental
+  static async cancelRental(req, res) {
+    const { rentalId } = req.params;
+    const userId = req.userId; // Assuming user ID is set by middleware after token verification
+
+    try {
+        const result = await RentalService.cancelRental(rentalId, userId);
+        if (!result.success) {
+            return res.status(400).json({ error: result.message });
+        }
+        res.status(200).json({ message: result.message });
+    } catch (error) {
+        console.error('Error cancelling rental:', error);
+        res.status(500).json({ error: 'Failed to cancel rental' });
+    }
+}
+
+// Extend rental period
+static async extendRentalPeriod(req, res) {
+    const { rentalId } = req.params;
+    const { newReturnDate } = req.body;
+
+    try {
+        const result = await RentalService.extendRentalPeriod(rentalId, newReturnDate);
+        if (!result.success) {
+            return res.status(400).json({ error: result.message });
+        }
+        res.status(200).json({ message: result.message, additionalCost: result.additionalCost });
+    } catch (error) {
+        console.error('Error extending rental period:', error);
+        res.status(500).json({ error: 'Failed to extend rental period' });
+    }
+}
 }
 
 module.exports = RentalController;

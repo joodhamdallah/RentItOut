@@ -22,7 +22,6 @@ router.delete('/returning-items/:id', verifyToken, authorizeRole('admin'), Retur
 router.post('/returning-items/returned-amount/:rental_item_id/:item_id', verifyToken, authorizeRole('admin', 'Insurance_Team'), ReturningItemsController.processReturn);
 
 //overtime_charge proccess
-router.post('/returning-items/overtime-charge/:rental_item_id/:item_id', verifyToken, authorizeRole('admin', 'Insurance_Team'), ReturningItemsController.calculateOvertimeCharge);
-
+router.post('/returning-items/overtime-charge/:RItem_id', verifyToken, authorizeRole('admin', 'Insurance_Team'), ReturningItemsController.calculateOvertimeCharge);
 
 module.exports = router;
