@@ -8,6 +8,7 @@ const Users = require('../controllers/UserController');
 const Rentals=require('../models/Rentals');
 const RentalService = require('../services/Rentals/RentalService');
 const RentalDetailsService=require('../services/Rentals/RentalDetailsService');
+const ReminderService = require('../services/ReturningItems/ReminderService');
 
 class RentalController {
   static async addToCart(req, res) {
@@ -99,7 +100,7 @@ class RentalController {
       
       // Check if all checkout details are present
       if (!req.session.cart || !req.session.checkoutDetails?.logistic_type || !req.session.checkoutDetails?.pay_id) {
-          return res.status(400).json({ error: 'Incomplete checkout details' });
+          return res.status(400).json({ error: 'Incomplete checkout details, logistic type and payment method are both required' });
       }
 
       try {
@@ -141,7 +142,7 @@ class RentalController {
       }
   }   
   // Get rentals with details for the logged-in user
-  static async getUserRentalsWithDetails(req, res) {
+  static async getMyRentals(req, res) {
       const userId = req.userId;
 
       if (!userId) {
@@ -225,6 +226,16 @@ static async extendRentalPeriod(req, res) {
     } catch (error) {
         console.error('Error extending rental period:', error);
         res.status(500).json({ error: 'Failed to extend rental period' });
+    }
+}
+
+static async sendReminderEmails(req, res) {
+    try {
+        await ReminderService.sendReturnReminderEmails();
+        res.status(200).json({ message: 'Reminder emails sent successfully.' });
+    } catch (error) {
+        console.error('Error sending reminder emails:', error);
+        res.status(500).json({ error: 'Failed to send reminder emails' });
     }
 }
 }
