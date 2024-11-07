@@ -45,7 +45,12 @@ const insertUsers = async () => {
       
       // Vendors
       { username: 'vendor1', email: 'vendor1@example.com', password: await bcrypt.hash('VendorPass123', 10), role: 'vendor', phone: '567-890-1234', firstName: 'Vendor', lastName: 'One', address: '123 Vendor St' },
-      { username: 'vendor2', email: 'vendor2@example.com', password: await bcrypt.hash('VendorPass456', 10), role: 'vendor', phone: '678-901-2345', firstName: 'Vendor', lastName: 'Two', address: '456 Vendor Ave' }
+      { username: 'vendor2', email: 'vendor2@example.com', password: await bcrypt.hash('VendorPass456', 10), role: 'vendor', phone: '678-901-2345', firstName: 'Vendor', lastName: 'Two', address: '456 Vendor Ave' },
+    
+       //Insurance Team
+       { username: 'Insurance_Team', email: 'Insurance_Team@example.com', password: await bcrypt.hash('Pass123', 10), role: 'Insurance Team', phone: '567-890-1234', firstName: 'Insurance_Team', lastName: 'One', address: '123 Insurance_Team St' },
+       { username: 'Insurance_Team2', email: 'Insurance_Team2@example.com', password: await bcrypt.hash('Pass456', 10), role: 'Insurance Team', phone: '678-901-2345', firstName: 'Insurance_Team', lastName: 'Two', address: '456 Insurance_Team Ave' }
+    
     ];
 
     // Insert each predefined user
@@ -159,6 +164,32 @@ const insertItems = () => {
   });
 };
 
+const insertProfits = () => {
+  connection.query('SELECT item_id, price_per_day FROM Items', (err, itemResults) => {
+    if (err) throw err;
+
+    const platformPercentage = 0.1;  // Platform takes 10%
+    const vendorPercentage = 1 - platformPercentage;
+
+    itemResults.forEach(item => {
+      const { item_id, price_per_day } = item;
+
+      const platformIncome = (price_per_day * platformPercentage).toFixed(2);
+      const vendorNetProfit = (price_per_day * vendorPercentage).toFixed(2);
+
+      const profitData = [item_id, platformIncome, vendorNetProfit];
+
+      connection.query(
+        'INSERT INTO Profits (item_id,  platform_income_per_item, vendor_net_profit) VALUES (?, ?, ?)',
+        profitData,
+        (err) => {
+          if (err) throw err;
+          console.log(`Profit record for item_id ${item_id} inserted`);
+        }
+      );
+    });
+  });
+};
 
 const insertDiscounts = () => {
   const discounts = [
@@ -404,6 +435,7 @@ setTimeout(insertFeedbacks, 12000);  // Feedbacks depends on Rentals and Users
 setTimeout(insertPayments, 14000);   // Payments must be inserted before Bills
 setTimeout(insertBills, 16000);      // Bills depend on Rentals and Payments
 setTimeout(insertReturningItems, 18000); // Returning_Items depends on Categories
+setTimeout(insertProfits, 20000);         // Profits depends on Items
 
 // Close the connection when done
-setTimeout(() => connection.end(), 20000);
+setTimeout(() => connection.end(), 22000);

@@ -8,7 +8,9 @@ const dropTables = [
     'DROP TABLE IF EXISTS Rental_details',    // Depends on Rentals, Items
     'DROP TABLE IF EXISTS Rentals',           // Depends on Users, Discounts
     'DROP TABLE IF EXISTS Discounts',         // No dependencies
+    'DROP TABLE IF EXISTS Profits',
     'DROP TABLE IF EXISTS Payments',          // No dependencies
+
     'DROP TABLE IF EXISTS Items',             // Depends on Categories, Users
     'DROP TABLE IF EXISTS Categories',        // No dependencies
     'DROP TABLE IF EXISTS Users',             // Depends on Roles
