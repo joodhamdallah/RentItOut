@@ -13,6 +13,7 @@ const discountsRoutes = require('./routes/discountsRoutes');
 const returningItemsRoutes = require('./routes/ReturningItemsRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const feedbackRoutes = require('./routes/feedbackRoutes')
+const ProfitsRoutes = require('./routes/ProfitsRoutes')
 
 
 
@@ -41,6 +42,7 @@ app.use('/api', discountsRoutes);
 app.use('/api', returningItemsRoutes);
 app.use('/api', paymentRoutes); 
 app.use('/api', feedbackRoutes); 
+app.use('/api', ProfitsRoutes ); 
 
 
 
