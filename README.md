@@ -1,7 +1,7 @@
 # RentItOut
 
 <p align="center">
-  <img src="images/logo.png" alt="RentItOut Logo" width="350"/>
+  <img src="images/logoBackground.png" alt="RentItOut Logo"  height="350" width="350"/>
 </p>
 
 **RentItOut** is a versatile rental platform that enables users to list, browse, and rent a wide range of items, materials, equipment, and more. Designed for owners customers and renters, this application simplifies the rental process by providing an intuitive interface and a comprehensive management system for all types of rentable items.
