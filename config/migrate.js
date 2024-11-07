@@ -47,6 +47,15 @@ const createTables = [
 
  );`,
 
+ `CREATE TABLE profits (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    item_id INT NOT NULL,
+    platform_income_per_item DECIMAL(10, 2) NOT NULL,
+    vendor_net_profit DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (item_id) REFERENCES Items(item_id)
+);`,
+
+
    `CREATE TABLE IF NOT EXISTS Discounts (
         discount_id INT PRIMARY KEY AUTO_INCREMENT,
         discount_name VARCHAR(255),
