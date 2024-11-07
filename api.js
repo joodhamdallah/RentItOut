@@ -17,6 +17,7 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const feedbackRoutes = require('./routes/feedbackRoutes');
 const billRoutes = require('./routes/billRoutes');
 const ReminderService = require('./services/ReturningItems/ReminderService');
+const ProfitsRoutes = require('./routes/ProfitsRoutes');
 
 
 
@@ -50,6 +51,7 @@ app.use('/api', discountsRoutes);
 app.use('/api', returningItemsRoutes);
 app.use('/api', paymentRoutes); 
 app.use('/api', feedbackRoutes); 
+app.use('/api', ProfitsRoutes ); 
 app.use('/api/bills', billRoutes); 
 
 
