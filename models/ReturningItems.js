@@ -126,23 +126,6 @@ class ReturningItemsModel {
     
     
 
-    // static getRentalDetailsAndPrice(rental_item_id, item_id) {
-    //     return new Promise((resolve, reject) => {
-    //         const query = `
-    //             SELECT r.return_date, i.price_per_day 
-    //             FROM Rental_details r 
-    //             JOIN Items i ON r.item_id = i.item_id 
-    //             WHERE r.rental_item_id = ? AND r.item_id = ?`; // Adjusted condition
-    //         db.query(query, [rental_item_id, item_id], (err, results) => {
-    //             if (err) return reject(new Error('Failed to retrieve rental details and price: ' + err.message));
-    //             if (results.length === 0) {
-    //                 return resolve(null); // Return null if no results found
-    //             }
-    //             resolve(results[0]); // Resolve with the first result
-    //         });
-    //     });
-    // }
-    
     static getRentalDetailsAndPrice(rental_item_id, item_id) {
         return new Promise((resolve, reject) => {
             const queryRental = 'SELECT return_date FROM Rental_details WHERE rental_item_id = ?';
@@ -152,7 +135,7 @@ class ReturningItemsModel {
                 if (err) return reject(new Error('Failed to retrieve return_date: ' + err.message));
                 if (rentalResults.length === 0) {
                     console.log(`No return_date found for rental_item_id: ${rental_item_id}`);
-                    return resolve(null);  // No rental details found
+                    return resolve(null); 
                 }
     
                 const return_date = rentalResults[0].return_date;
@@ -161,7 +144,7 @@ class ReturningItemsModel {
                     if (err) return reject(new Error('Failed to retrieve price_per_day: ' + err.message));
                     if (itemResults.length === 0) {
                         console.log(`No price_per_day found for item_id: ${item_id}`);
-                        return resolve(null);  // No item details found
+                        return resolve(null); 
                     }
     
                     const price_per_day = itemResults[0].price_per_day;
