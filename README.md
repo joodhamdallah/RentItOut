@@ -195,6 +195,7 @@ Your go-to platform for easy, secure, and flexible rentals.
   - SESSION_SECRET=JoodSession_22Secret
 
 6. Run the application:
-```bash  node api.js 
+  ```bash
+  node api.js 
    ```
   
