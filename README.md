@@ -37,10 +37,8 @@ Your go-to platform for easy, secure, and flexible rentals.
 - [External APIs Used](#external_apis_used)
 - [External Libraries and Packages](#external-libraries-and-packages)
 - [Installation](#installation)
-- [Usage](#usage)
-- [License](#license)
-  
 
+  
 ## Core Features⭐
 1. Item Listings for Rent:
    - Administrator has the authority to create categories that include a set of items.
@@ -197,7 +195,6 @@ Your go-to platform for easy, secure, and flexible rentals.
   - SESSION_SECRET=JoodSession_22Secret
 
 6. Run the application:
-```bash
-    node api.js 
+```bash  node api.js 
    ```
   
