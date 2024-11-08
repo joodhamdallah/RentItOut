@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken');
 const UserModel = require('../models/User');
 const { promisify } = require('util');
-const sendEmail = require('../utils/sendEmail'); // Assume a function to send emails
 
 const roleMapping = {
     admin: 1,

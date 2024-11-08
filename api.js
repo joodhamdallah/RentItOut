@@ -6,16 +6,16 @@ const app = express();
 require('dotenv').config({ path: './.env' });
 
 
-const authRoutes = require('./routes/authRoutes'); 
-const userRoutes = require('./routes/userRoutes'); 
-const categoryRoutes = require('./routes/categoryRoutes');
-const itemRoutes = require('./routes/itemRoutes');
-const rentalRoutes = require('./routes/rentalsRoutes');
-const discountsRoutes = require('./routes/discountsRoutes');
+const authRoutes = require('./routes/AuthRoutes'); 
+const userRoutes = require('./routes/UserRoutes'); 
+const categoryRoutes = require('./routes/CategoryRoutes');
+const itemRoutes = require('./routes/ItemRoutes');
+const rentalRoutes = require('./routes/RentalsRoutes');
+const discountsRoutes = require('./routes/DiscountsRoutes');
 const returningItemsRoutes = require('./routes/ReturningItemsRoutes');
-const paymentRoutes = require('./routes/paymentRoutes');
-const feedbackRoutes = require('./routes/feedbackRoutes');
-const billRoutes = require('./routes/billRoutes');
+const paymentRoutes = require('./routes/PaymentRoutes');
+const feedbackRoutes = require('./routes/FeedbackRoutes');
+const billRoutes = require('./routes/BillRoutes');
 const ReminderService = require('./services/ReturningItems/ReminderService');
 const ProfitsRoutes = require('./routes/ProfitsRoutes');
 
