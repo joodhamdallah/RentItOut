@@ -104,6 +104,7 @@ Your go-to platform for easy, secure, and flexible rentals.
 ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
 ![Postman](https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=postman&logoColor=white)
 ![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)
+![Swagger](https://img.shields.io/badge/Swagger-85C9B8?style=for-the-badge&logo=swagger&logoColor=white)
 
 ## External APIs Used📌
 - OpenRouteService API: The platform utilizes the OpenRouteService API to calculate accurate delivery costs for rented items. When a customer selects the delivery option, the API calculates the driving distance between the pickup location (specified by the platform or vendor) and the customer’s address. This distance-based calculation determines the shipping cost, which is added to the customer’s bill.
