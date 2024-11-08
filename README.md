@@ -37,7 +37,7 @@
    - Or it can be sent for delivery and the delivery price of this item will be added to his bill according to the location.
      
 5. Revenue Model 
-   - Price management is between the admins (the platform owners) and the vendors, enabling them to share the profits among them within agreed percentages.
+   - Profits management is between the admins (the platform owners) and the vendors, enabling them to share the profits among them within agreed percentages.
   
      
 5. User Experience and Recommendations:
@@ -69,10 +69,8 @@
     - .....
 
  5. ReturningItems Management:📌 <<<<<<< leema talk about the details of this >>>>>>>>
-    - ......
-    - ....
-    - ....
-    - ....
+    - Managed by insurance team who check and decide the status of item and based on it the returned amount of deopsit is determined and payed back to customer.
+    - handle the overtime charge by comparing the return date and actual return date.
 
   6. if theres any extra features pls dont be shy girls :) ❤️
      - .....
