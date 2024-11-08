@@ -1,0 +1,2430 @@
+openapi: 3.0.0
+info:
+  title: RentItOut API Documentation
+  description: API documentation for the RentItOut rental platform
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000/api
+    description: Local server
+
+tags:
+  - name: Authentication
+    description: Endpoints for user authentication and password management
+  - name: User Management
+    description: Endpoints for managing user profiles and accounts (admin-only for certain actions)
+  - name: Categories 
+    description: Endpoints for managing categories
+  - name: Items
+    description: Endpoints for managing items
+  - name: Discounts
+    description: Endpoints for managing discounts
+  - name: Payments
+    description: Endpoints for managing payment methods
+  - name: Feedback
+    description: Endpoints for managing feedback on items
+  - name: Profits
+    description: Endpoints for calculating and retrieving profits
+  - name: Bills
+    description: Endpoints for managing bills
+  - name: Returning Items
+    description: Endpoints for managing returning items
+  - name: Rentals
+    description: Endpoints for managing rentals, carts, and checkout processes
+paths:
+  /auth/register:
+    post:
+      summary: Register a new user
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: "user@example.com"
+                password:
+                  type: string
+                  example: "SecurePass123!"
+                role_id:
+                  type: integer
+                  example: 2
+                user_name:
+                  type: string
+                  example: "john_doe"
+                first_name:
+                  type: string
+                  example: "John"
+                last_name:
+                  type: string
+                  example: "Doe"
+                phone_number:
+                  type: string
+                  example: "+1234567890"
+                address:
+                  type: string
+                  example: "123 Main St, City, Country"
+              required:
+                - email
+                - password
+                - role_id
+                - user_name
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User created successfully"
+                  userId:
+                    type: integer
+                    example: 123
+        '400':
+          description: Validation error
+        '403':
+          description: Invalid role ID or Admin registration not allowed
+        '500':
+          description: Server error
+
+  /auth/login:
+    post:
+      summary: Log in a user
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: "user@example.com"
+                password:
+                  type: string
+                  example: "SecurePass123!"
+              required:
+                - email
+                - password
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Login successful"
+        '400':
+          description: Missing email or password
+        '401':
+          description: Invalid email or password
+        '500':
+          description: Server error
+
+  /auth/logout:
+    post:
+      summary: Log out a user
+      tags:
+        - Authentication
+      responses:
+        '200':
+          description: Logged out successfully
+        '500':
+          description: Server error
+
+  /auth/forgotPassword:
+    post:
+      summary: Request a password reset
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: "user@example.com"
+              required:
+                - email
+      responses:
+        '200':
+          description: Token sent to email
+        '404':
+          description: No user found with that email address
+        '500':
+          description: Error sending the email
+
+  /auth/resetPassword/{token}:
+    patch:
+      summary: Reset password with token
+      tags:
+        - Authentication
+      parameters:
+        - in: path
+          name: token
+          schema:
+            type: string
+          required: true
+          description: Password reset token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                  example: "NewSecurePass123!"
+              required:
+                - password
+      responses:
+        '200':
+          description: Password has been reset successfully
+        '400':
+          description: Token is invalid or expired, or password validation error
+        '500':
+          description: Server error
+
+  /auth/changePassword:
+    patch:
+      summary: Change password (requires authentication)
+      tags:
+        - Authentication
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                currentPassword:
+                  type: string
+                  example: "CurrentPass123!"
+                newPassword:
+                  type: string
+                  example: "NewSecurePass123!"
+              required:
+                - currentPassword
+                - newPassword
+      responses:
+        '200':
+          description: Password changed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Password changed successfully. Please log in again."
+                  loginUrl:
+                    type: string
+                    example: "http://localhost:3000/api/auth/login"
+        '400':
+          description: Current password is incorrect or new password validation error
+        '401':
+          description: Authentication required
+        '500':
+          description: Server error
+
+  /users:
+    get:
+      summary: Retrieve all users (Admin only)
+      tags:
+        - User Management
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of users retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    userId:
+                      type: integer
+                    email:
+                      type: string
+                    user_name:
+                      type: string
+                    role_id:
+                      type: integer
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin access only
+        '500':
+          description: Server error
+
+    post:
+      summary: Create a new user (Admin only)
+      tags:
+        - User Management
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: "newuser@example.com"
+                password:
+                  type: string
+                  example: "Password123!"
+                user_name:
+                  type: string
+                  example: "new_user"
+                role_id:
+                  type: integer
+                  example: 2
+                first_name:
+                  type: string
+                  example: "New"
+                last_name:
+                  type: string
+                  example: "User"
+                phone_number:
+                  type: string
+                  example: "+1234567890"
+                address:
+                  type: string
+                  example: "456 Another St"
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User created successfully"
+                  userId:
+                    type: integer
+                    example: 124
+        '400':
+          description: Email already registered or validation error
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin access only
+        '500':
+          description: Server error
+
+  /users/{id}:
+    get:
+      summary: Retrieve a user by ID (Admin only)
+      tags:
+        - User Management
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: User ID
+      responses:
+        '200':
+          description: User retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: integer
+                  email:
+                    type: string
+                  user_name:
+                    type: string
+                  role_id:
+                    type: integer
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin access only
+        '404':
+          description: User not found
+        '500':
+          description: Server error
+
+    delete:
+      summary: Delete a user by ID (Admin only)
+      tags:
+        - User Management
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: User ID
+      responses:
+        '200':
+          description: User deleted successfully
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin access only
+        '404':
+          description: User not found
+        '500':
+          description: Server error
+
+  /users/email/{email}:
+    get:
+      summary: Retrieve a user by email (Admin only)
+      tags:
+        - User Management
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: email
+          schema:
+            type: string
+          required: true
+          description: User email
+      responses:
+        '200':
+          description: User retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: integer
+                  email:
+                    type: string
+                  user_name:
+                    type: string
+                  role_id:
+                    type: integer
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin access only
+        '404':
+          description: User not found
+        '500':
+          description: Server error
+
+  /users/phone/{phoneNumber}:
+    get:
+      summary: Retrieve a user by phone number (Admin only)
+      tags:
+        - User Management
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: phoneNumber
+          schema:
+            type: string
+          required: true
+          description: User phone number
+      responses:
+        '200':
+          description: User retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: integer
+                  email:
+                    type: string
+                  user_name:
+                    type: string
+                  role_id:
+                    type: integer
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin access only
+        '404':
+          description: User not found
+        '500':
+          description: Server error
+  /users/updateProfile:
+    patch:
+      summary: Update the current authenticated user's profile
+      tags:
+        - User Management
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone_number:
+                  type: string
+                  example: "+1234567890"
+                address:
+                  type: string
+                  example: "123 Main St, City, Country"
+                first_name:
+                  type: string
+                  example: "John"
+                last_name:
+                  type: string
+                  example: "Doe"
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Profile updated successfully."
+        '400':
+          description: No fields provided to update
+        '401':
+          description: Authentication required
+        '500':
+          description: Server error
+  /users/myProfile:
+    get:
+      summary: Retrieve the current authenticated user's profile
+      tags:
+        - User Management
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: integer
+                  email:
+                    type: string
+                  role_id:
+                    type: integer
+                  user_name:
+                    type: string
+                  first_name:
+                    type: string
+                  last_name:
+                    type: string
+                  phone_number:
+                    type: string
+                  address:
+                    type: string
+        '401':
+          description: Authentication required
+        '404':
+          description: User not found
+        '500':
+          description: Server error
+  
+  /categories:
+    get:
+      summary: List all categories
+      tags:
+        - Categories
+      responses:
+        '200':
+          description: Categories retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+        '500':
+          description: Failed to retrieve categories
+
+    post:
+      summary: Add a new category (Admin only)
+      tags:
+        - Categories
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Electronics"
+      responses:
+        '201':
+          description: Category added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin access only
+        '500':
+          description: Failed to add category
+
+  /categories/{id}:
+    get:
+      summary: Get a specific category by ID
+      tags:
+        - Categories
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Category ID
+      responses:
+        '200':
+          description: Category retrieved successfully
+        '404':
+          description: Category not found
+        '500':
+          description: Failed to retrieve category
+
+    put:
+      summary: Update a category (Admin only)
+      tags:
+        - Categories
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Updated Category Name"
+      responses:
+        '200':
+          description: Category updated successfully
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin access only
+        '404':
+          description: Category not found
+        '500':
+          description: Failed to update category
+
+    delete:
+      summary: Delete a category (Admin only)
+      tags:
+        - Categories
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Category ID
+      responses:
+        '200':
+          description: Category deleted successfully
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin access only
+        '404':
+          description: Category not found
+        '500':
+          description: Failed to delete category
+
+  /categories/search/{name}:
+    get:
+      summary: Search categories by name
+      tags:
+        - Categories
+      parameters:
+        - in: path
+          name: name
+          schema:
+            type: string
+          required: true
+          description: Category name
+      responses:
+        '200':
+          description: Categories found
+        '404':
+          description: No categories found
+        '500':
+          description: Failed to search for categories
+
+  /items:
+    get:
+      summary: List all items
+      tags:
+        - Items
+      responses:
+        '200':
+          description: Items retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '500':
+          description: Failed to retrieve items
+
+    post:
+      summary: Create a new item (Admin or Vendor only)
+      tags:
+        - Items
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Laptop"
+                description:
+                  type: string
+                  example: "A high-performance laptop"
+                price:
+                  type: number
+                  format: float
+                  example: 999.99
+      responses:
+        '201':
+          description: Item created successfully
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin or Vendor access only
+        '500':
+          description: Failed to create item
+
+  /items/{id}:
+    get:
+      summary: Get item by ID
+      tags:
+        - Items
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Item ID
+      responses:
+        '200':
+          description: Item retrieved successfully
+        '404':
+          description: Item not found
+        '500':
+          description: Failed to retrieve item
+
+    put:
+      summary: Update an item (Admin or Vendor only)
+      tags:
+        - Items
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Updated Item Name"
+                description:
+                  type: string
+                  example: "Updated item description"
+                price:
+                  type: number
+                  format: float
+                  example: 1099.99
+      responses:
+        '200':
+          description: Item updated successfully
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin or Vendor access only
+        '404':
+          description: Item not found
+        '500':
+          description: Failed to update item
+
+    delete:
+      summary: Delete an item (Admin or Vendor only)
+      tags:
+        - Items
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Item ID
+      responses:
+        '200':
+          description: Item deleted successfully
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin or Vendor access only
+        '404':
+          description: Item not found
+        '500':
+          description: Failed to delete item
+
+  /items/search/{name}:
+    get:
+      summary: Search items by name
+      tags:
+        - Items
+      parameters:
+        - in: path
+          name: name
+          schema:
+            type: string
+          required: true
+          description: Item name
+      responses:
+        '200':
+          description: Items found
+        '404':
+          description: No items found
+        '500':
+          description: Failed to search for items
+
+  /user/items:
+    get:
+      summary: List items for the authenticated user (Admin or Vendor only)
+      tags:
+        - Items
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Items retrieved successfully for the user
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin or Vendor access only
+        '404':
+          description: No items found for this user
+        '500':
+          description: Failed to retrieve items for the user   
+  /discounts:
+    get:
+      summary: List all discounts
+      tags:
+        - Discounts
+      responses:
+        '200':
+          description: Discounts retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        discount_name:
+                          type: string
+                          example: "Summer Sale"
+                        discount_percentage:
+                          type: number
+                          format: float
+                          example: 20
+                        description:
+                          type: string
+                          example: "20% off for all rentals during summer"
+        '500':
+          description: Failed to retrieve discounts
+
+    post:
+      summary: Add a new discount (Admin only)
+      tags:
+        - Discounts
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                discount_name:
+                  type: string
+                  example: "Holiday Discount"
+                discount_percentage:
+                  type: number
+                  format: float
+                  example: 15
+                description:
+                  type: string
+                  example: "15% off during the holiday season"
+              required:
+                - discount_name
+                - discount_percentage
+                - description
+      responses:
+        '201':
+          description: Discount added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+        '400':
+          description: Missing required fields
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin access only
+        '500':
+          description: Failed to add discount
+
+  /discounts/{id}:
+    get:
+      summary: Get a specific discount by ID
+      tags:
+        - Discounts
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Discount ID
+      responses:
+        '200':
+          description: Discount retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      discount_name:
+                        type: string
+                      discount_percentage:
+                        type: number
+                        format: float
+                      description:
+                        type: string
+        '404':
+          description: Discount not found
+        '500':
+          description: Failed to retrieve discount
+
+    put:
+      summary: Update an existing discount (Admin only)
+      tags:
+        - Discounts
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Discount ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                discount_name:
+                  type: string
+                  example: "Updated Discount"
+                discount_percentage:
+                  type: number
+                  format: float
+                  example: 10
+                description:
+                  type: string
+                  example: "Updated description for the discount"
+      responses:
+        '200':
+          description: Discount updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Discount updated successfully"
+                  data:
+                    type: object
+        '400':
+          description: Discount percentage out of range or validation error
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin access only
+        '404':
+          description: Discount not found
+        '500':
+          description: Failed to update discount
+
+    delete:
+      summary: Delete a discount (Admin only)
+      tags:
+        - Discounts
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Discount ID
+      responses:
+        '200':
+          description: Discount deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Discount deleted successfully"
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin access only
+        '404':
+          description: Discount not found
+        '500':
+          description: Failed to delete discount   
+  /payments:
+    get:
+      summary: List all payment methods
+      tags:
+        - Payments
+      responses:
+        '200':
+          description: Payment methods retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    pay_id:
+                      type: integer
+                      example: 1
+                    payment_method:
+                      type: string
+                      example: "Credit Card"
+        '500':
+          description: Database error
+
+    post:
+      summary: Create a new payment method (Admin only)
+      tags:
+        - Payments
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                payment_method:
+                  type: string
+                  example: "Credit Card"
+              required:
+                - payment_method
+      responses:
+        '201':
+          description: Payment method created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Payment method created successfully"
+                  pay_id:
+                    type: integer
+                    example: 3
+        '400':
+          description: Missing required fields
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin access only
+        '500':
+          description: Database error
+
+  /payments/{id}:
+    get:
+      summary: Get a payment method by ID
+      tags:
+        - Payments
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Payment method ID
+      responses:
+        '200':
+          description: Payment method retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pay_id:
+                    type: integer
+                    example: 1
+                  payment_method:
+                    type: string
+                    example: "Credit Card"
+        '404':
+          description: Payment method not found
+        '500':
+          description: Database error
+
+    put:
+      summary: Update a payment method (Admin only)
+      tags:
+        - Payments
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Payment method ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                payment_method:
+                  type: string
+                  example: "Updated Payment Method"
+              required:
+                - payment_method
+      responses:
+        '200':
+          description: Payment method updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Payment method updated successfully"
+        '400':
+          description: Missing payment method field
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin access only
+        '404':
+          description: Payment method not found
+        '500':
+          description: Database error
+
+    delete:
+      summary: Delete a payment method (Admin only)
+      tags:
+        - Payments
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Payment method ID
+      responses:
+        '200':
+          description: Payment method deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Payment method deleted successfully"
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin access only
+        '404':
+          description: Payment method not found
+        '500':
+          description: Database error
+  /feedback:
+    post:
+      summary: Create a new feedback
+      tags:
+        - Feedback
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rental_id:
+                  type: integer
+                  example: 5
+                item_id:
+                  type: integer
+                  example: 12
+                comment:
+                  type: string
+                  example: "Great item, very useful!"
+                rating:
+                  type: integer
+                  example: 4
+              required:
+                - rental_id
+                - item_id
+                - rating
+      responses:
+        '201':
+          description: Feedback created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Feedback created successfully"
+                  feedbackId:
+                    type: integer
+                    example: 1
+        '400':
+          description: Invalid item or rental association
+        '500':
+          description: Server error
+
+    get:
+      summary: List all feedbacks (Admin or Vendor only)
+      tags:
+        - Feedback
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Feedback retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    feedbackId:
+                      type: integer
+                    item_id:
+                      type: integer
+                    user_id:
+                      type: integer
+                    comment:
+                      type: string
+                    rating:
+                      type: integer
+        '403':
+          description: Forbidden - Admin or Vendor access only
+        '500':
+          description: Server error
+
+  /feedback/item/{itemId}:
+    get:
+      summary: Get feedbacks for a specific item
+      tags:
+        - Feedback
+      parameters:
+        - in: path
+          name: itemId
+          schema:
+            type: integer
+          required: true
+          description: Item ID
+      responses:
+        '200':
+          description: Feedback retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    feedbackId:
+                      type: integer
+                    user_id:
+                      type: integer
+                    comment:
+                      type: string
+                    rating:
+                      type: integer
+        '404':
+          description: Item not found
+        '500':
+          description: Server error
+
+  /feedback/user:
+    get:
+      summary: Get feedbacks submitted by the authenticated user
+      tags:
+        - Feedback
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Feedback retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    feedbackId:
+                      type: integer
+                    item_id:
+                      type: integer
+                    comment:
+                      type: string
+                    rating:
+                      type: integer
+        '401':
+          description: Authentication required
+        '500':
+          description: Server error
+
+  /feedback/most-rented:
+    get:
+      summary: Get most rented items based on feedback
+      tags:
+        - Feedback
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          description: Limit the number of most rented items
+      responses:
+        '200':
+          description: Most rented items retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    item_id:
+                      type: integer
+                    rentals_count:
+                      type: integer
+                    rating:
+                      type: integer
+        '500':
+          description: Server error
+
+  /feedback/{feedbackId}:
+    put:
+      summary: Update feedback
+      tags:
+        - Feedback
+      parameters:
+        - in: path
+          name: feedbackId
+          schema:
+            type: integer
+          required: true
+          description: Feedback ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                comment:
+                  type: string
+                  example: "Updated feedback comment"
+                rating:
+                  type: integer
+                  example: 5
+      responses:
+        '200':
+          description: Feedback updated successfully
+        '404':
+          description: Feedback not found
+        '500':
+          description: Server error
+
+    delete:
+      summary: Delete feedback
+      tags:
+        - Feedback
+      parameters:
+        - in: path
+          name: feedbackId
+          schema:
+            type: integer
+          required: true
+          description: Feedback ID
+      responses:
+        '200':
+          description: Feedback deleted successfully
+        '404':
+          description: Feedback not found
+        '500':
+          description: Server error
+  /profits/calculate/{item_id}:
+    post:
+      summary: Calculate and insert profit for an item
+      tags:
+        - Profits
+      parameters:
+        - in: path
+          name: item_id
+          schema:
+            type: integer
+          required: true
+          description: Item ID to calculate profit for
+      responses:
+        '201':
+          description: Profit calculated and inserted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Profit calculated and inserted successfully"
+        '404':
+          description: Item not found
+        '500':
+          description: Server error
+
+  /profits:
+    get:
+      summary: Retrieve all profits
+      tags:
+        - Profits
+      responses:
+        '200':
+          description: Profits retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    item_id:
+                      type: integer
+                    profit_amount:
+                      type: number
+                      format: float
+                    date_calculated:
+                      type: string
+                      format: date
+        '500':
+          description: Server error
+
+  /vendor-profits/{user_id}:
+    get:
+      summary: Retrieve profits by vendor (Admin or Vendor only)
+      tags:
+        - Profits
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: integer
+          required: true
+          description: User ID of the vendor
+      responses:
+        '200':
+          description: Vendor profits retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    item_id:
+                      type: integer
+                    profit_amount:
+                      type: number
+                      format: float
+                    date_calculated:
+                      type: string
+                      format: date
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin or Vendor access only
+        '500':
+          description: Server error
+  /bills/my-bills:
+    get:
+      summary: Retrieve all bills for the authenticated user
+      tags:
+        - Bills
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User bills retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    bill_id:
+                      type: integer
+                    user_id:
+                      type: integer
+                    amount:
+                      type: number
+                      format: float
+                    created_at:
+                      type: string
+                      format: date-time
+        '401':
+          description: Authentication required
+        '500':
+          description: Server error
+
+  /bills:
+    get:
+      summary: Retrieve all bills (Admin only)
+      tags:
+        - Bills
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of all bills retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    bill_id:
+                      type: integer
+                    user_id:
+                      type: integer
+                    amount:
+                      type: number
+                      format: float
+                    created_at:
+                      type: string
+                      format: date-time
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin access only
+        '500':
+          description: Server error
+
+  /bills/{billId}:
+    get:
+      summary: Retrieve a specific bill by ID (Admin only)
+      tags:
+        - Bills
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: billId
+          schema:
+            type: integer
+          required: true
+          description: Bill ID
+      responses:
+        '200':
+          description: Bill retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bill_id:
+                    type: integer
+                  user_id:
+                    type: integer
+                  amount:
+                    type: number
+                    format: float
+                  created_at:
+                    type: string
+                    format: date-time
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin access only
+        '404':
+          description: Bill not found
+        '500':
+          description: Server error
+
+    put:
+      summary: Update a specific bill by ID (Admin only)
+      tags:
+        - Bills
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: billId
+          schema:
+            type: integer
+          required: true
+          description: Bill ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: number
+                  format: float
+                status:
+                  type: string
+                  example: "Paid"
+      responses:
+        '200':
+          description: Bill updated successfully
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin access only
+        '404':
+          description: Bill not found
+        '500':
+          description: Server error
+
+    delete:
+      summary: Delete a specific bill by ID (Admin only)
+      tags:
+        - Bills
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: billId
+          schema:
+            type: integer
+          required: true
+          description: Bill ID
+      responses:
+        '200':
+          description: Bill deleted successfully
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin access only
+        '404':
+          description: Bill not found
+        '500':
+          description: Server error
+
+  /bills/user/{userId}:
+    get:
+      summary: Retrieve bills for a specific user (Admin only)
+      tags:
+        - Bills
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: integer
+          required: true
+          description: User ID
+      responses:
+        '200':
+          description: User bills retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    bill_id:
+                      type: integer
+                    amount:
+                      type: number
+                      format: float
+                    created_at:
+                      type: string
+                      format: date-time
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin access only
+        '500':
+          description: Server error
+
+  /bills/rental/{rentalId}:
+    get:
+      summary: Retrieve bill by rental ID (Admin only)
+      tags:
+        - Bills
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: rentalId
+          schema:
+            type: integer
+          required: true
+          description: Rental ID
+      responses:
+        '200':
+          description: Bill retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bill_id:
+                    type: integer
+                  user_id:
+                    type: integer
+                  rental_id:
+                    type: integer
+                  amount:
+                    type: number
+                    format: float
+                  created_at:
+                    type: string
+                    format: date-time
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin access only
+        '404':
+          description: Bill not found
+        '500':
+          description: Server error
+  /returning-items:
+    get:
+      summary: Retrieve all returning items (Admin only)
+      tags:
+        - Returning Items
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of returning items retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    item_name:
+                      type: string
+                    status_for_item:
+                      type: string
+                    returned_amount:
+                      type: number
+                      format: float
+                    actual_return_date:
+                      type: string
+                      format: date
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin access only
+        '500':
+          description: Server error
+
+    post:
+      summary: Create a new returning item (Admin/Insurance_Team)
+      tags:
+        - Returning Items
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                item_name:
+                  type: string
+                status_for_item:
+                  type: string
+                returned_amount:
+                  type: number
+                actual_return_date:
+                  type: string
+                  format: date
+                rental_item_id:
+                  type: integer
+                item_id:
+                  type: integer
+                overtime_charge:
+                  type: number
+      responses:
+        '201':
+          description: Returning item created successfully
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin/Insurance_Team access only
+        '500':
+          description: Server error
+
+  /returning-items/{id}:
+    get:
+      summary: Retrieve a specific returning item by ID
+      tags:
+        - Returning Items
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Returning item ID
+      responses:
+        '200':
+          description: Returning item retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  item_name:
+                    type: string
+                  status_for_item:
+                    type: string
+                  returned_amount:
+                    type: number
+                    format: float
+                  actual_return_date:
+                    type: string
+                    format: date
+        '404':
+          description: Returning item not found
+        '500':
+          description: Server error
+
+    put:
+      summary: Update a returning item by ID (Admin only)
+      tags:
+        - Returning Items
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Returning item ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status_for_item:
+                  type: string
+                returned_amount:
+                  type: number
+                actual_return_date:
+                  type: string
+                  format: date
+                overtime_charge:
+                  type: number
+      responses:
+        '200':
+          description: Returning item updated successfully
+        '404':
+          description: Returning item not found
+        '500':
+          description: Server error
+
+    delete:
+      summary: Delete a returning item by ID (Admin only)
+      tags:
+        - Returning Items
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Returning item ID
+      responses:
+        '200':
+          description: Returning item deleted successfully
+        '404':
+          description: Returning item not found
+        '500':
+          description: Server error
+
+  /returning-items/returned-amount/{rental_item_id}/{item_id}:
+    post:
+      summary: Process returned amount based on item condition (Admin/Insurance_Team)
+      tags:
+        - Returning Items
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: rental_item_id
+          schema:
+            type: integer
+          required: true
+          description: Rental item ID
+        - in: path
+          name: item_id
+          schema:
+            type: integer
+          required: true
+          description: Item ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status_for_item:
+                  type: string
+                actual_return_date:
+                  type: string
+                  format: date
+      responses:
+        '201':
+          description: Return amount processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  deposit:
+                    type: number
+                    format: float
+                  returned_amount:
+                    type: number
+                    format: float
+        '404':
+          description: Item or rental item not found
+        '500':
+          description: Server error
+
+  /returning-items/overtime-charge/{RItem_id}:
+    post:
+      summary: Calculate overtime charge for a returned item (Admin/Insurance_Team)
+      tags:
+        - Returning Items
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: RItem_id
+          schema:
+            type: integer
+          required: true
+          description: Returning item ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                actual_return_date:
+                  type: string
+                  format: date
+      responses:
+        '200':
+          description: Overtime charge calculated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  overtime_charge:
+                    type: number
+                    format: float
+                  overtime_days:
+                    type: integer
+        '404':
+          description: Returning item or rental details not found
+        '500':
+          description: Server error   
+  /rentals/cart:
+    post:
+      summary: Add item to cart
+      tags:
+        - Rentals
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                item_id:
+                  type: integer
+                  example: 1
+                quantity:
+                  type: integer
+                  example: 2
+                rental_date:
+                  type: string
+                  format: date
+                  example: "2024-12-01"
+                return_date:
+                  type: string
+                  format: date
+                  example: "2024-12-15"
+      responses:
+        '200':
+          description: Item added to cart successfully
+        '400':
+          description: Validation error
+        '500':
+          description: Server error
+
+    get:
+      summary: Get cart items
+      tags:
+        - Rentals
+      responses:
+        '200':
+          description: Cart retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cart:
+                    type: array
+                    items:
+                      type: object
+                  total:
+                    type: number
+                    format: float
+        '500':
+          description: Server error
+
+  /rentals/cart/{itemId}:
+    put:
+      summary: Update an item in the cart
+      tags:
+        - Rentals
+      parameters:
+        - in: path
+          name: itemId
+          schema:
+            type: integer
+          required: true
+          description: ID of the cart item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantity:
+                  type: integer
+                  example: 1
+                rental_date:
+                  type: string
+                  format: date
+                  example: "2024-12-01"
+                return_date:
+                  type: string
+                  format: date
+                  example: "2024-12-15"
+      responses:
+        '200':
+          description: Cart item updated successfully
+        '400':
+          description: Validation error
+        '500':
+          description: Server error
+
+    delete:
+      summary: Remove item from cart
+      tags:
+        - Rentals
+      parameters:
+        - in: path
+          name: itemId
+          schema:
+            type: integer
+          required: true
+          description: ID of the cart item
+      responses:
+        '200':
+          description: Cart item removed successfully
+        '500':
+          description: Server error
+
+  /rentals/checkout/logistics:
+    post:
+      summary: Collect logistics details for checkout
+      tags:
+        - Rentals
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                logistic_type:
+                  type: string
+                  example: "Delivery"
+                userAddress:
+                  type: string
+                  example: "123 Main St, City, Country"
+      responses:
+        '200':
+          description: Logistics details collected successfully
+        '400':
+          description: Validation error
+        '500':
+          description: Server error
+
+  /rentals/checkout/payment:
+    post:
+      summary: Collect payment details for checkout
+      tags:
+        - Rentals
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                payment_method:
+                  type: string
+                  example: "Credit Card"
+      responses:
+        '200':
+          description: Payment details collected successfully
+        '400':
+          description: Validation error
+        '500':
+          description: Server error
+
+  /rentals/checkout/confirm:
+    post:
+      summary: Confirm checkout
+      tags:
+        - Rentals
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Checkout confirmed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Checkout confirmed"
+                  rentalId:
+                    type: integer
+                  bill:
+                    type: object
+        '400':
+          description: Incomplete checkout details
+        '500':
+          description: Server error
+
+  /rentals/my-rentals:
+    get:
+      summary: Get rentals for the logged-in user
+      tags:
+        - Rentals
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Rentals retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '401':
+          description: Authentication required
+        '500':
+          description: Server error
+
+  /rentals/basics:
+    get:
+      summary: Get all rentals with basic info (Admin only)
+      tags:
+        - Rentals
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Rentals retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin access only
+        '500':
+          description: Server error
+
+  /rentals/details/{rentalId}:
+    get:
+      summary: Get rental details by rental ID (Admin only)
+      tags:
+        - Rentals
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: rentalId
+          schema:
+            type: integer
+          required: true
+          description: Rental ID
+      responses:
+        '200':
+          description: Rental details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin access only
+        '404':
+          description: Rental not found
+        '500':
+          description: Server error
+
+  /rentals/{rentalId}:
+    delete:
+      summary: Delete rental by ID (Admin only)
+      tags:
+        - Rentals
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: rentalId
+          schema:
+            type: integer
+          required: true
+          description: Rental ID
+      responses:
+        '200':
+          description: Rental deleted successfully
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin access only
+        '500':
+          description: Server error
+
+  /rentals/send-reminders:
+    post:
+      summary: Send reminder emails for rentals (Admin only)
+      tags:
+        - Rentals
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Reminder emails sent successfully
+        '401':
+          description: Authentication required
+        '403':
+          description: Forbidden - Admin access only
+        '500':
+          description: Server error
+
+     
+# components:
+#   securitySchemes:
+#     bearerAuth:
+#       type: http
+#       scheme: bearer
+#       bearerFormat: JWT
