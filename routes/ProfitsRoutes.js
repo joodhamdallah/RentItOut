@@ -4,9 +4,9 @@ const router = express.Router();
 const { verifyToken, authorizeRole } = require('../middleware/authMiddleware');
 
 // Route to calculate and insert profit for an item
-router.post('/profits/calculate/:item_id', ProfitsController.calculateProfit);
+router.post('/profits/calculate/:item_id',verifyToken, authorizeRole('admin'), ProfitsController.calculateProfit);
 
-router.get('/profits', ProfitsController.getProfits);
+router.get('/profits',verifyToken, authorizeRole('admin'), ProfitsController.getProfits);
 
 router.get('/vendor-profits/:user_id',verifyToken, authorizeRole('admin','vendor'), ProfitsController.getVendorProfitsByUser);
 
