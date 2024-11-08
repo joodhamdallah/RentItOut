@@ -111,34 +111,33 @@ Your go-to platform for easy, secure, and flexible rentals.
 - OpenStreetMap Nominatim API: This API is used for geocoding addresses, converting the customer's inputted address and the platform’s pickup location into geographic coordinates. These coordinates allow the platform to determine the distance between locations, essential for calculating logistics costs accurately.
 
 ## External Libraries and Packages 📦
+- **mysql2**: Connects to the MySQL database and manages data transactions within the platform.
 
-- mysql2: Connects to the MySQL database and manages data transactions within the platform.
+- **@faker-js/faker**: Generates fake data for testing, such as usernames, emails, and addresses, to help with seeding the database.
 
-- @faker-js/faker: Generates fake data for testing, such as usernames, emails, and addresses, to help with seeding the database.
+- **bcrypt**: Encrypts user passwords by hashing them, ensuring they are stored securely.
 
-- bcrypt: Encrypts user passwords by hashing them, ensuring they are stored securely.
+- **crypto**: Generates secure, hashed tokens, particularly for password reset functions. For example, tokens are hashed when generating password reset links.
 
-- crypto: Generates secure, hashed tokens, particularly for password reset functions. For example, tokens are hashed when generating password reset links.
+- **jsonwebtoken (jwt)**: Creates JSON Web Tokens for secure user authentication and role-based access control.
 
-- jsonwebtoken (jwt): Creates JSON Web Tokens for secure user authentication and role-based access control.
+- **express**: The core framework for building the server and handling routes, middleware, and HTTP requests.
 
-- express: The core framework for building the server and handling routes, middleware, and HTTP requests.
+- **cookie-parser**: Parses cookies in HTTP requests. In this project, it handles token management, especially for cookies storing authentication tokens.
 
-- cookie-parser: Parses cookies in HTTP requests. In this project, it handles token management, especially for cookies storing authentication tokens.
+- **express-session**: Manages user sessions, particularly for features like the cart, by storing session data on the server.
 
-- express-session: Manages user sessions, particularly for features like the cart, by storing session data on the server.
+- **node-cron**: Schedules automated tasks. In this project, it’s used to schedule daily email reminders for users, ensuring timely return of rented items.
 
-- node-cron: Schedules automated tasks. In this project, it’s used to schedule daily email reminders for users, ensuring timely return of rented items.
+- **axios**: Facilitates HTTP requests to external APIs, such as the OpenRouteService and Nominatim APIs, used for calculating delivery distances and geocoding addresses.
 
-- axios: Facilitates HTTP requests to external APIs, such as the OpenRouteService and Nominatim APIs, used for calculating delivery distances and geocoding addresses.
+- **moment**: Formats dates and times, useful for billing dates, rental return dates, and other time-sensitive data.
 
-- moment: Formats dates and times, useful for billing dates, rental return dates, and other time-sensitive data.
+- **geolib**: Calculates geographic distances between locations, helping with shipping cost calculations for deliveries.
 
-- geolib: Calculates geographic distances between locations, helping with shipping cost calculations for deliveries.
+- **puppeteer**: Generates PDFs, such as invoices for rentals, using custom HTML and CSS for formatting.
 
-- puppeteer: Generates PDFs, such as invoices for rentals, using custom HTML and CSS for formatting.
-
-- nodemailer: Sends emails, including password reset links and rental invoices, to keep users informed.
+- **nodemailer**: Sends emails, including password reset links and rental invoices, to keep users informed.
 
 ## Installation
 
