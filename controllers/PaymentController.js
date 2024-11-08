@@ -1,13 +1,8 @@
 const Payment = require('../models/Payment'); 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY); // Test key for Stripe
-const paypal = require('@paypal/checkout-server-sdk');
 //const axios = require('axios');
 
-const environment = new paypal.core.SandboxEnvironment(
-  process.env.PAYPAL_CLIENT_ID,
-  process.env.PAYPAL_SECRET
-);
-const paypalClient = new paypal.core.PayPalHttpClient(environment);
+
 class PaymentController {
   // Get all payment methods
   static getAllPayments(req, res) {

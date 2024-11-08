@@ -16,8 +16,7 @@ router.post('/checkout/confirm', verifyToken, RentalController.confirmCheckout);
 
 // User-specific rental routes
 router.get('/my-rentals', verifyToken, RentalController.getMyRentals); // Get rentals for logged-in user
-router.post('/cancel/:rentalId', verifyToken, RentalController.cancelRental); // Cancel a rental
-router.put('/extend/:rentalId', verifyToken, RentalController.extendRentalPeriod); // Extend rental period
+
 
 // Admin routes
 router.get('/basics', verifyToken, authorizeRole('admin'), RentalController.getAllRentalsWithInfo); // Get all rentals with basic info
