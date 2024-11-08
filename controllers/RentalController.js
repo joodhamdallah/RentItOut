@@ -77,9 +77,29 @@ class RentalController {
     }
 
     static async collectLogisticsDetails(req, res) {
+        const { logistic_type, userAddress } = req.body;  // Only userAddress from the body
+        const pickupAddress = "Brooklyn Bridge, New York, NY 10038"; // Default pickup location
+    
         try {
-            LogisticsService.validateLogisticType(req.body.logistic_type);
-            req.session.checkoutDetails = { ...req.session.checkoutDetails, logistic_type: req.body.logistic_type };
+            LogisticsService.validateLogisticType(logistic_type);
+            req.session.checkoutDetails = { ...req.session.checkoutDetails, logistic_type };
+    
+            if (logistic_type === 'Delivery') {
+                // Ensure userAddress is provided as a string
+                if (!userAddress) {
+                    return res.status(400).json({ error: 'For delivery, userAddress is required.' });
+                }
+                // Geocode the default pickup address and provided user address
+                const pickupLocation = await LogisticsService.geocodeAddress(pickupAddress);
+                const destinationLocation = await LogisticsService.geocodeAddress(userAddress);
+    
+                req.session.checkoutDetails = {
+                    ...req.session.checkoutDetails,
+                    pickupLocation,
+                    userAddress: destinationLocation
+                };
+            }
+    
             res.status(200).json({ message: 'Logistics details received.' });
         } catch (error) {
             res.status(400).json({ error: error.message });
@@ -102,8 +122,12 @@ class RentalController {
       if (!req.session.cart || !req.session.checkoutDetails?.logistic_type || !req.session.checkoutDetails?.pay_id) {
           return res.status(400).json({ error: 'Incomplete checkout details, logistic type and payment method are both required' });
       }
-
-      try {
+      if (req.session.checkoutDetails.logistic_type === 'Delivery') {
+        const { pickupLocation, userAddress } = req.session.checkoutDetails;
+        if (!pickupLocation || !userAddress || !pickupLocation.lat || !pickupLocation.lng || !userAddress.lat || !userAddress.lng) {
+         return res.status(400).json({ error: 'For delivery, both pickupAddress and userAddress with valid coordinates are required.' });
+       }
+    }try {
         const user = await Users.getUserById(userId);
 
         if (!user) throw new Error('User not found');
@@ -140,7 +164,8 @@ class RentalController {
           console.error('Error confirming checkout:', error);
           res.status(500).json({ error: 'Failed to confirm checkout' });
       }
-  }   
+    }
+
   // Get rentals with details for the logged-in user
   static async getMyRentals(req, res) {
       const userId = req.userId;
@@ -195,40 +220,6 @@ class RentalController {
       }
   }
   
-  // Cancel a rental
-  static async cancelRental(req, res) {
-    const { rentalId } = req.params;
-    const userId = req.userId; // Assuming user ID is set by middleware after token verification
-
-    try {
-        const result = await RentalService.cancelRental(rentalId, userId);
-        if (!result.success) {
-            return res.status(400).json({ error: result.message });
-        }
-        res.status(200).json({ message: result.message });
-    } catch (error) {
-        console.error('Error cancelling rental:', error);
-        res.status(500).json({ error: 'Failed to cancel rental' });
-    }
-}
-
-// Extend rental period
-static async extendRentalPeriod(req, res) {
-    const { rentalId } = req.params;
-    const { newReturnDate } = req.body;
-
-    try {
-        const result = await RentalService.extendRentalPeriod(rentalId, newReturnDate);
-        if (!result.success) {
-            return res.status(400).json({ error: result.message });
-        }
-        res.status(200).json({ message: result.message, additionalCost: result.additionalCost });
-    } catch (error) {
-        console.error('Error extending rental period:', error);
-        res.status(500).json({ error: 'Failed to extend rental period' });
-    }
-}
-
 static async sendReminderEmails(req, res) {
     try {
         await ReminderService.sendReturnReminderEmails();
