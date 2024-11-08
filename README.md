@@ -11,7 +11,7 @@ Your go-to platform for easy, secure, and flexible rentals.
     <a href="https://github.com/joodhamdallah/RentItOut/wiki/RentItOut-Wiki"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="">View Demo</a>
+    <a href="https://drive.google.com/file/d/1JWYMJUP-ZTfPFAo5BEffEkdLJMWE_TDN/view?usp=sharing">View Demo</a>
   </p>
 </div>
 
