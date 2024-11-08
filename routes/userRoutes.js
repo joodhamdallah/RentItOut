@@ -13,7 +13,7 @@ router.get('/users/:id', verifyToken, authorizeRole('admin'), UserController.get
 router.get('/users/email/:email', verifyToken, authorizeRole('admin'), UserController.getUserByEmail);
 router.get('/users/phone/:phoneNumber', verifyToken, authorizeRole('admin'), UserController.getUserByPhoneNumber); 
 
-router.post('/users', UserController.createUser);
-router.delete('/users/:id', UserController.deleteUser);
+router.post('/users',verifyToken, authorizeRole('admin'), UserController.createUser);
+router.delete('/users/:id', verifyToken, authorizeRole('admin'),UserController.deleteUser);
 
 module.exports = router;
