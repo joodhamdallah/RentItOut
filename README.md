@@ -8,12 +8,10 @@
   <p align="center">
 Your go-to platform for easy, secure, and flexible rentals.
     <br />
-    <a href=""><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/joodhamdallah/RentItOut/wiki/RentItOut-Wiki"><strong>Explore the docs »</strong></a>
     <br />
     <br />
     <a href="">View Demo</a>
-    ·
-    <a href="">Report Bug</a>
   </p>
 </div>
 
@@ -96,6 +94,7 @@ Your go-to platform for easy, secure, and flexible rentals.
     - Handle the overtime charge by comparing the return date and actual return date.
     - The platform automatically sends an email reminder to customers one day before the scheduled return date to ensure timely item returns. This reminder can also be manually triggered by admins if needed.
  
+ 6. Error Handling and Logging: The platform provides specific error messages for different cases and logs events to support easy debugging and troubleshooting.
 
 
 ## Technologies Used⚙
@@ -188,10 +187,10 @@ Your go-to platform for easy, secure, and flexible rentals.
   - NODE_ENV=development
   - JWT_SECRET=RentItOut-SaLeJo/26/12
   - JWT_EXPIRES_IN=10m
-  - EMAIL_USERNAME="gameboxjsd2023@gmail.com"
-  - EMAIL_PASSWORD="pidj svlq nxel nohb"
-  - EMAIL_FROM="RentItOut Support <your-email@gmail.com>"
-  - SESSION_SECRET=JoodSession_22Secret
+  - EMAIL_USERNAME=Email username
+  - EMAIL_PASSWORD=Email password
+  - EMAIL_FROM=Email from
+  - SESSION_SECRET=session secret
 
 6. Run the application:
   ```bash
