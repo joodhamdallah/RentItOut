@@ -110,7 +110,7 @@ Your go-to platform for easy, secure, and flexible rentals.
 - OpenRouteService API: The platform utilizes the OpenRouteService API to calculate accurate delivery costs for rented items. When a customer selects the delivery option, the API calculates the driving distance between the pickup location (specified by the platform or vendor) and the customer’s address. This distance-based calculation determines the shipping cost, which is added to the customer’s bill.
 - OpenStreetMap Nominatim API: This API is used for geocoding addresses, converting the customer's inputted address and the platform’s pickup location into geographic coordinates. These coordinates allow the platform to determine the distance between locations, essential for calculating logistics costs accurately.
 
-## External Libraries and Packages 📦
+## External Libraries and Packages📦
 - **mysql2**: Connects to the MySQL database and manages data transactions within the platform.
 
 - **@faker-js/faker**: Generates fake data for testing, such as usernames, emails, and addresses, to help with seeding the database.
