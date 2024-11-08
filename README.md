@@ -179,8 +179,8 @@ Your go-to platform for easy, secure, and flexible rentals.
 
 5. Set up .env: Duplicate the `.env.example` file and rename it to `.env` using the following command:
    ```bash
-  cp .env.example .env
-  ```
+   cp .env.example .env
+   ```
   - DB_HOST=localhost         
   - DB_USER=root               
   - DB_PASSWORD=      
@@ -196,6 +196,6 @@ Your go-to platform for easy, secure, and flexible rentals.
 
 6. Run the application:
   ```bash
-  node api.js 
-   ```
+   node api.js 
+```
   
